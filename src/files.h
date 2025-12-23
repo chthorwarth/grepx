@@ -2,7 +2,6 @@
 #ifndef FILES_H
 #define FILES_H
 
-void traverse(char *path);
-char *getContent(char *path);
+int exploreDirectories(const char *path);
 
 #endif

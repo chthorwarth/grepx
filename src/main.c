@@ -15,11 +15,13 @@ static void add_string(char ***array, int *count, const char *value) {
 int main(int argc, char *argv[]) {
 
     // Stdiin
+    /*
     char buf[1024];
 
     while (fgets(buf, sizeof(buf), stdin)) {
         printf("%s", buf);
     }
+    */
     // end Stdin
 
     grep_options_t opts = {0};
@@ -98,5 +100,8 @@ int main(int argc, char *argv[]) {
         printf("  %s\n", opts.paths[i]);
     }
 
+    // 2. Durchsuche bla.txt nach "Hallo"
+
+    printf("Hello World\n");
     return 0;
 }
