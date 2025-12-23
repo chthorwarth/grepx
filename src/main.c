@@ -14,14 +14,15 @@ static void add_string(char ***array, int *count, const char *value) {
 
 int main(int argc, char *argv[]) {
 
-    // Stdiin
+    // Stdin
+    /*
     char buf[1024];
 
     while (fgets(buf, sizeof(buf), stdin)) {
         printf("%s", buf);
     }
+    */
     // end Stdin
-
     grep_options_t opts = {0};
 
     int opt;
