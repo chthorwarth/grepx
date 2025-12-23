@@ -11,31 +11,25 @@
 // files.c
 #include "files.h"
 
-void traverse(char *path)
+int exploreDirectories(const char *path)
 {
-    DIR *directory;
-    directory = opendir(path);
+    DIR *directory = opendir(path);
 
-    struct dirent *direntry;
+    struct dirent *dirEntry;
 
     if (directory == NULL)
     {
-        return;
+        return EXIT_FAILURE;
     }
-    printf("%s", "Hello Word2\n");
-    while ((direntry = readdir(directory)) != NULL)
+    while ((dirEntry = readdir(directory)) != NULL)
     {
-        if (strcmp(direntry->d_name, ".") != 0 && strcmp(direntry->d_name, "..") != 0)
+        if (strcmp(dirEntry->d_name, ".") != 0 && strcmp(dirEntry->d_name, "..") != 0)
         {
-            printf("%s\n",(*direntry).d_name);
-            traverse(direntry->d_name);
+            printf("%s\n", dirEntry->d_name);
+            exploreDirectories(dirEntry->d_name);
         }
     }
 
-
     closedir(directory);
-}
-
-char *getContent(char *path) {
-    return "asdfölasödjlf\nHello World\n";
+    return EXIT_SUCCESS;
 }
