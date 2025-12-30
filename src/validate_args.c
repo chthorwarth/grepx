@@ -49,10 +49,10 @@ int validate(grep_options_t *opts, char *context_endptr) {
     if (opts->path_count == 0 && !opts->recursive) {
         /* grep defaults to stdin if no path is given,
            so this may be acceptable depending on spec */
-        /* Uncomment if you want to enforce at least one path */
         /*
         fprintf(stderr, "No input files specified\n");
         return -1;
         */
     }
+    return 0;
 }

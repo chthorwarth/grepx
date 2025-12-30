@@ -38,7 +38,7 @@ void parse(int *argc, char *argv[], grep_options_t *opts, char *context_endptr) 
             case 'C':
                 // optarg is the argument of the parameter
                 // strtol converts *char to long
-                // endptr points to last char that could not be parsed \0 if successful
+                // context_endptr points to last char that could not be parsed \0 if successful
                 opts->context = (int)strtol(optarg, &context_endptr, 10);
                 break;
             case 'e':

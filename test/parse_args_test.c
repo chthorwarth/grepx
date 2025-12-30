@@ -7,33 +7,6 @@
 #include "../src/parse_args.h"
 #include "../src/grep_options.h"
 
-bool options_equal(const grep_options_t *a, const grep_options_t *b)
-{
-    if (a->ignore_case != b->ignore_case) return false;
-    if (a->invert_match != b->invert_match) return false;
-    if (a->show_line_number != b->show_line_number) return false;
-    if (a->count_only != b->count_only) return false;
-    if (a->list_files != b->list_files) return false;
-    if (a->quiet != b->quiet) return false;
-    if (a->recursive != b->recursive) return false;
-    if (a->context != b->context) return false;
-
-    if (a->pattern_count != b->pattern_count) return false;
-    for (int i = 0; i < a->pattern_count; i++)
-        if (strcmp(a->patterns[i], b->patterns[i]) != 0)
-            return false;
-
-    if (a->path_count != b->path_count) return false;
-    for (int i = 0; i < a->path_count; i++)
-        if (strcmp(a->paths[i], b->paths[i]) != 0)
-            return false;
-
-    if ((a->pattern_filename == NULL) != (b->pattern_filename == NULL)) return false;
-    if (a->pattern_filename && strcmp(a->pattern_filename, b->pattern_filename) != 0)
-        return false;
-    return true;
-}
-
 bool test_basic(void)
 {
     char *argv[] = {

@@ -31,5 +31,6 @@ void grep_options_init(grep_options_t *opts);
 void grep_options_free(grep_options_t *opts);
 void add_string(char ***array, int *count, const char *value);
 void grep_options_print(grep_options_t *opts);
+bool options_equal(const grep_options_t *a, const grep_options_t *b);
 
 #endif
