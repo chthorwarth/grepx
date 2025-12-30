@@ -1,20 +1,41 @@
-typedef struct {
-    bool ignore_case;      // -i
-    bool invert_match;     // -v
-    bool show_line_number; // -n
-    bool count_only;       // -c
-    bool list_files;       // -l
-    bool quiet;            // -q
-    bool recursive;        // -r
+#include "grep_options.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 
-    int context;           // -C <n>
+// Helper function: Add string to dynamic array
+void add_string(char ***array, int *count, const char *value) {
+    *array = realloc(*array, sizeof(char *) * (*count + 1));
+    char *dst = malloc(strlen(value) + 1);
+    if (dst == NULL) {
+        fprintf(stderr, "out of memory\n");
+        exit(2);
+    }
+    strcpy(dst, value);
+    *(*array+*count) = dst;
+    (*count)++;
+}
 
-    // Pattern handling
-    char **patterns;       // -e, -f, oder Positions-PATTERN
-    int pattern_count;
+void grep_options_print(grep_options_t *opts) {
+    /* Debug-Ausgabe (nur zum Testen) */
+    printf("OPTIONS:\n");
+    printf("  ignore_case: %d\n", opts->ignore_case);
+    printf("  invert_match: %d\n", opts->invert_match);
+    printf("  show_line_number: %d\n", opts->show_line_number);
+    printf("  count_only: %d\n", opts->count_only);
+    printf("  list_files: %d\n", opts->list_files);
+    printf("  quiet: %d\n", opts->quiet);
+    printf("  recursive: %d\n", opts->recursive);
+    printf("  context: %d\n", opts->context);
 
-    // Files / paths
-    char **paths;          // file1 file2 dir1 ...
-    int path_count;
+    printf("\nPATTERNS:\n");
+    for (int i = 0; i < opts->pattern_count; i++) {
+        printf("  %s\n", opts->patterns[i]);
+    }
 
-} grep_options_t;
+    printf("\nPATHS:\n");
+    for (int i = 0; i < opts->path_count; i++) {
+        printf("  %s\n", opts->paths[i]);
+    }
+}

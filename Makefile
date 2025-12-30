@@ -20,11 +20,7 @@ directories:
 # ========================
 # Quellcode
 # ========================
-SRC = $(SRC_DIR)/main.c \
-      $(SRC_DIR)/files.c \
-      $(SRC_DIR)/search.c \
-      $(SRC_DIR)/queue.c
-
+SRC := $(wildcard $(SRC_DIR)/*.c)
 SRC_NO_MAIN = $(filter-out $(SRC_DIR)/main.c,$(SRC))
 OBJ = $(SRC:$(SRC_DIR)/%.c=$(BUILD_DIR)/src/%.o)
 OBJ_NO_MAIN = $(SRC_NO_MAIN:$(SRC_DIR)/%.c=$(BUILD_DIR)/src/%.o)
