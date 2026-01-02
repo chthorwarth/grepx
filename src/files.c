@@ -8,26 +8,36 @@
 #include<dirent.h>
 #include<string.h>
 
-// files.c
 #include "files.h"
 
-int exploreDirectories(const char *path)
+int exploreDirectories(const char *path, Queue *q)
 {
     DIR *directory = opendir(path);
 
-    struct dirent *dirEntry;
-
     if (directory == NULL)
     {
+        //perror("opendir");
         return EXIT_FAILURE;
     }
+
+    struct dirent *dirEntry;
+
     while ((dirEntry = readdir(directory)) != NULL)
     {
-        if (strcmp(dirEntry->d_name, ".") != 0 && strcmp(dirEntry->d_name, "..") != 0)
+        if (strcmp(dirEntry->d_name, ".") == 0 || strcmp(dirEntry->d_name, "..") == 0)
+            continue;
+
+        size_t len = strlen(path) + 1 + strlen(dirEntry->d_name) + 1;
+        char *fullPath = malloc(len);
+        if (!fullPath)
         {
-            printf("%s\n", dirEntry->d_name);
-            exploreDirectories(dirEntry->d_name);
+            closedir(directory);
+            return EXIT_FAILURE;
         }
+        snprintf(fullPath, len, "%s/%s", path, dirEntry->d_name);
+
+        enqueue(q, fullPath);
+        exploreDirectories(fullPath, q);
     }
 
     closedir(directory);
