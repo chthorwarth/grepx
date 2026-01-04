@@ -8,6 +8,7 @@
 #include "grep_options.h"
 #include "parse_args.h"
 #include "validate_args.h"
+#include "search.h"
 
 
 int main(int argc, char *argv[]) {
@@ -17,4 +18,10 @@ int main(int argc, char *argv[]) {
     parse(&argc, argv, &opts, context_endptr);
 
     validate(&opts, context_endptr);
+
+    for (int i = 0; i < opts.path_count; i++) {
+        searchInFile(opts.paths[i], &opts);
+    }
+
+    return 0;
 }
