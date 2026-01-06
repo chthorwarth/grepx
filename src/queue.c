@@ -56,13 +56,32 @@ char *dequeue(Queue *q)
 	free(tmp);
 	return path;
 }
-
 void printQueue(const Queue *q)
 {
+	if (!q)
+	{
+		printf("(Queue is NULL)\n");
+		return;
+	}
+
+	if (!q->head)
+	{
+		printf("(Queue is empty)\n");
+		return;
+	}
+
 	Element *current = q->head;
-	while (current) {
-		printf("%s\n", current->path);
+	int index = 0;
+
+	while (current)
+	{
+		if (current->path)
+			printf("[%d] %s\n", index, current->path);
+		else
+			printf("[%d] (NULL path)\n", index);
+
 		current = current->next;
+		index++;
 	}
 }
 

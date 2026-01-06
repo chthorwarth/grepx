@@ -40,8 +40,6 @@ DIRS = $(SRC_DIR) $(TEST_DIR) $(BUILD_DIR)/src $(BUILD_DIR)/test $(BIN_DIR)
 # ========================
 # Produktionscode bauen
 # ========================
-all: directories $(BIN_DIR)/$(TARGET)
-
 $(BIN_DIR)/$(TARGET): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
@@ -54,8 +52,14 @@ $(BUILD_DIR)/src/%.o: $(SRC_DIR)/%.c
 # ========================
 tests: directories $(TEST_BIN)
 
+# normale Tests (alle Objektdateien)
 $(BIN_DIR)/%: $(BUILD_DIR)/test/%.o $(OBJ_NO_MAIN)
-	$(CC) $(CFLAGS) -o $@ $^
+	# Spezialregel: thread_handler-Tests dürfen search.o NICHT linken
+	if [ "$@" = "$(BIN_DIR)/test_thread_handler" ]; then \
+		$(CC) $(CFLAGS) -o $@ $< $(filter-out $(BUILD_DIR)/src/search.o,$(OBJ_NO_MAIN)); \
+	else \
+		$(CC) $(CFLAGS) -o $@ $^; \
+	fi
 
 $(BUILD_DIR)/test/%.o: $(TEST_DIR)/%.c
 	@mkdir -p $(dir $@)
