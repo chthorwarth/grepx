@@ -1,58 +1,74 @@
-// Created by Christian Thorwarth on 21.12.25.
-// -> Basic grep search functions for one file
-//
-
-
-// boolean searchWord(String word, String content)
-// int searchWord(String word, String content)
-
-#include <stdlib.h>
+#define _GNU_SOURCE     // for strcasestr
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include "grep_options.h"
+#include "search.h"
 
-
-int searchWord()
-{
-    FILE *file;
-    file = fopen("/Users/christianthorwarth/git/grepx/src/main.c", "r");
-    char pattern[] = "Users";
-    char input[255];
-    long counter = 0;
-    long c;
-    int line = 1;
-    if (file == NULL)
-    {
+int searchInFile(const char *filename, grep_options_t *opts) {
+FILE *file = fopen(filename, "r");
+    
+    if (!file) {
+        //Only print error if NOT in quiet mode
+        if (!opts->quiet) {
+            perror(filename);
+        }
         return EXIT_FAILURE;
     }
 
-    while (fgets(input, 255, file))
-    {
-        int i = 0;
-        counter = 0;
-        fputs(input, stdout);
-        while (i <= strlen(input))
-        {
-            c = *(input+i);
+    char line[1024];
+    int line_nr = 1;
+    int match_count = 0;
+    bool found_any = false;
 
-            if (counter == strlen(pattern))
-            {
-                counter = 0;
-                printf("Pattern found in line: %d\n",line);
+    while (fgets(line, sizeof(line), file)) {
+        bool match = false;
+        
+        for (int i = 0; i < opts->pattern_count; i++) {
+            if (opts->ignore_case) {
+                if (strcasestr(line, opts->patterns[i]) != NULL) {          // Case-insensitive substring search(GNU extension)
+                    match = true;
+                    break;
+                }
+            } else {
+                if (strstr(line, opts->patterns[i]) != NULL) {
+                    match = true;
+                    break;
+                }
             }
-            if(c == pattern[counter])
-            {
-                counter++;
-            }
-            else
-            {
-                counter = 0;
-            }
-            i++;
         }
 
-        line++;
+        if (match != opts->invert_match) {      // Output line if it matches the search criteria (considering -v for inverted results)
+            found_any = true;
+            
+            if (opts->quiet) {
+                fclose(file);                   // In quiet mode: exit immediately without printing anything
+                return EXIT_SUCCESS;
+            }
+
+            if (opts->list_files) {
+                printf("%s\n", filename);       //print filename and stop searching this file immediately for -l option
+                fclose(file);
+                return EXIT_SUCCESS;
+            }
+
+            match_count++;
+            if (opts->count_only) {
+
+                if (opts->show_line_number) {
+                    printf("%d:", line_nr);         // If -n is set, prefix the output with the current line number
+                }
+                printf("%s", line);
+                }
+        }
+        line_nr++;
+    }
+
+    if (opts->count_only) {
+        printf("%d\n", match_count);        // print the total match_count if -c is set
     }
 
     fclose(file);
-    return 0;
+    return found_any ? EXIT_SUCCESS : EXIT_FAILURE; // Return 0 (Success) if found, 1 (Failure) if not
 }
