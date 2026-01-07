@@ -20,7 +20,15 @@ FILE *file = fopen(filename, "r");
     char line[1024];
     int line_nr = 1;
     int match_count = 0;
+    int print_after_counter = 0;        // Keeps track of how many trailing context lines to print
     bool found_any = false;
+
+    // asign memory for before context lines if -C is set
+    char **before_context = NULL;
+    if (opts->context > 0) {
+        before_context = calloc(opts->context,sizeof(char *));      // calloc is used to initialize all pointers to NULL
+    }
+    int buffer_index = 0;
 
     while (fgets(line, sizeof(line), file)) {
         bool match = false;
@@ -52,23 +60,56 @@ FILE *file = fopen(filename, "r");
                 fclose(file);
                 return EXIT_SUCCESS;
             }
-
             match_count++;
-            if (opts->count_only) {
+
+
+            if (!opts->count_only) {
+                if (opts->recursive || opts->path_count > 1) {
+                    printf("%s:", filename);                    //print filename prefix if recursive or multiple paths
+                }
+
+                if (before_context) {
+                    for (int i = 0; i < opts->context; i++) {
+                        int idx = (buffer_index + i) % opts->context;       // Index hops to 0, if the end of the buffer is reached
+                        if (before_context[idx] != NULL) {
+                            printf("%s", before_context[idx]);              // Print stored context lines
+                            free(before_context[idx]);                      // Free memoryafter printing
+                            before_context[idx] = NULL;                     // Free Pointer to prevent double free
+                        }
+                    }
+                }
 
                 if (opts->show_line_number) {
                     printf("%d:", line_nr);         // If -n is set, prefix the output with the current line number
                 }
                 printf("%s", line);
                 }
+                print_after_counter = opts->context;  
+            } 
+            // No match case
+            else {  
+                if (print_after_counter > 0 && !opts->count_only) {
+                    printf("%s", line);
+                    print_after_counter--;
+                } 
+                else if (opts->context > 0) {
+                    // store line in circular buffer for potential future matches
+                    if (before_context[buffer_index]) free(before_context[buffer_index]);   // free old line before overwriting
+                    before_context[buffer_index] = strdup(line);                   // duplicate line into buffer
+                    buffer_index = (buffer_index + 1) % opts->context;          // advance the ring index
+                }
         }
         line_nr++;
     }
 
-    if (opts->count_only) {
-        printf("%d\n", match_count);        // print the total match_count if -c is set
+    if (before_context) {
+        // Final cleanup of any remaining context buffer memory
+        for (int i = 0; i < opts->context; i++) {
+            if (before_context[i]) free(before_context[i]);
+        }
+        free(before_context);
     }
-
+    
     fclose(file);
-    return found_any ? EXIT_SUCCESS : EXIT_FAILURE; // Return 0 (Success) if found, 1 (Failure) if not
+    return found_any ? EXIT_SUCCESS : EXIT_FAILURE; // Return 0 if found, 1 if not
 }
