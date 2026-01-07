@@ -7,6 +7,6 @@
 #include "queue.h"
 #include "grep_options.h"
 
-void parallelize(Queue *q, grep_options_t *opts);
+int parallelize(Queue *q, grep_options_t *opts);
 
 #endif //GREPX_THREAD_HANDLER_H

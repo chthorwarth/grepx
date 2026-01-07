@@ -14,31 +14,29 @@
 #include "thread_handler.h"
 
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     grep_options_t opts = {0};
     char *context_endptr = NULL;
+    Queue *q = createQueue();
 
     parse(&argc, argv, &opts, context_endptr);
     validate(&opts, context_endptr);
 
-    if (opts.recursive)
-    {
-        Queue *q = createQueue();
+    // RECURSIVE
+    if (opts.recursive) {
         exploreDirectories(opts.paths[0], q);
-        if (queueSize(q) > 1)
-        {
-            parallelize(q, &opts);
-        }
-        freeQueue(q);
-        return 0;
     }
-
+    // MULTIPLE FILES
     for (int i = 0; i < opts.path_count; i++) {
-        searchInFile(opts.paths[i], &opts);
+        enqueue(q,opts.paths[i]);
     }
-    if (opts.path_count == 0)
-        searchStream(stdin, NULL, &opts);
+    if (queueSize(q) >= 1) {
+        return parallelize(q, &opts);
+    }
 
+    // STDIN
+    if (opts.path_count == 0)
+        return searchStream(stdin, NULL, &opts);
+    freeQueue(q);
     return 0;
 }
