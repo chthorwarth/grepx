@@ -106,7 +106,7 @@ void test_basic() {
     int rc = searchInFile("t1.txt", &opts);
     assert(rc == EXIT_SUCCESS);
 
-    assert_output_equals(tmp, "Hausbau ist toll\n");
+    assert_output_equals(tmp, "t1.txt:Hausbau ist toll\n");
 
     cleanup_test(tmp, "t1.txt", "out1.txt");
     printf("PASS ✓\n");
@@ -153,7 +153,7 @@ void test_ignore_case() {
     int rc = searchInFile("t3.txt", &opts);
     assert(rc == EXIT_SUCCESS);
 
-    assert_output_equals(tmp, "hausbau\n");
+    assert_output_equals(tmp, "t3.txt:hausbau\n");
 
     cleanup_test(tmp, "t3.txt", "out3.txt");
     printf("PASS ✓\n");
@@ -179,7 +179,7 @@ void test_invert_match() {
     int rc = searchInFile("t4.txt", &opts);
     assert(rc == EXIT_SUCCESS);
 
-    assert_output_equals(tmp, "Auto\n");
+    assert_output_equals(tmp, "t4.txt:Auto\n");
 
     cleanup_test(tmp, "t4.txt", "out4.txt");
     printf("PASS ✓\n");
@@ -211,7 +211,8 @@ void test_quiet_mode() {
 void test_list_files() {
     printf("TEST: list files...\n");
 
-    write_temp_file("t6.txt", "Haus\n");
+    write_temp_file("t6.txt", "Haus\n"
+        "Katze\n");
 
     FILE *tmp = redirect_stdout_to_temp("out6.txt");
 
@@ -251,7 +252,7 @@ void test_count_only() {
     int rc = searchInFile("t7.txt", &opts);
     assert(rc == EXIT_SUCCESS);
 
-    assert_output_equals(tmp, "2\n");
+    assert_output_equals(tmp, "t7.txt:2\n");
 
     cleanup_test(tmp, "t7.txt", "out7.txt");
     printf("PASS ✓\n");
@@ -300,8 +301,8 @@ void test_show_line_number() {
     assert(rc == EXIT_SUCCESS);
 
     assert_output_equals(tmp,
-                         "2:Hausbau ist toll\n"
-                         "3:Noch ein Haus\n");
+    "t_ln.txt:2:Hausbau ist toll\n"
+                         "t_ln.txt:3:Noch ein Haus\n");
 
     cleanup_test(tmp, "t_ln.txt", "out_ln.txt");
     printf("PASS ✓\n");
@@ -327,7 +328,7 @@ void test_multiple_patterns() {
     int rc = searchInFile("t_mp.txt", &opts);
     assert(rc == EXIT_SUCCESS);
 
-    assert_output_equals(tmp, "Hausbau ist toll\n");
+    assert_output_equals(tmp, "t_mp.txt:Hausbau ist toll\n");
 
     cleanup_test(tmp, "t_mp.txt", "out_mp.txt");
     printf("PASS ✓\n");
@@ -354,7 +355,7 @@ void test_line_numbers_ignore_case() {
     int rc = searchInFile("t_ln_i.txt", &opts);
     assert(rc == EXIT_SUCCESS);
 
-    assert_output_equals(tmp, "2:hausbau\n");
+    assert_output_equals(tmp, "t_ln_i.txt:2:hausbau\n");
 
     cleanup_test(tmp, "t_ln_i.txt", "out_ln_i.txt");
     printf("PASS ✓\n");
@@ -381,7 +382,7 @@ void test_line_numbers_invert_match() {
     int rc = searchInFile("t_ln_v.txt", &opts);
     assert(rc == EXIT_SUCCESS);
 
-    assert_output_equals(tmp, "2:Auto\n");
+    assert_output_equals(tmp, "t_ln_v.txt:2:Auto\n");
 
     cleanup_test(tmp, "t_ln_v.txt", "out_ln_v.txt");
     printf("PASS ✓\n");
@@ -468,7 +469,9 @@ void test_long_line() {
     int rc = searchInFile("t_long.txt", &opts);
     assert(rc == EXIT_SUCCESS);
 
-    assert_output_equals(tmp, content);
+    char expected[1300];
+    snprintf(expected, sizeof(expected), "t_long.txt:%s", content);
+    assert_output_equals(tmp, expected);
 
     cleanup_test(tmp, "t_long.txt", "out_long.txt");
     printf("PASS ✓\n");
@@ -495,9 +498,9 @@ void test_empty_pattern_matches_all() {
     assert(rc == EXIT_SUCCESS);
 
     assert_output_equals(tmp,
-        "eins\n"
-        "zwei\n"
-        "drei\n"
+        "t_empty_pat.txt:eins\n"
+        "t_empty_pat.txt:zwei\n"
+        "t_empty_pat.txt:drei\n"
     );
 
     cleanup_test(tmp, "t_empty_pat.txt", "out_empty_pat.txt");
@@ -527,8 +530,8 @@ void test_regex_two_dots_match() {
     assert(rc == EXIT_SUCCESS);
 
     assert_output_equals(tmp,
-        "purchaseAA\n"
-        "purchase12\n"
+        "t_regex1.txt:purchaseAA\n"
+        "t_regex1.txt:purchase12\n"
     );
 
     cleanup_test(tmp, "t_regex1.txt", "out_regex1.txt");
@@ -556,9 +559,9 @@ void test_regex_match_all() {
     assert(rc == EXIT_SUCCESS);
 
     assert_output_equals(tmp,
-        "eins\n"
-        "zwei\n"
-        "drei\n"
+        "t_regex2.txt:eins\n"
+        "t_regex2.txt:zwei\n"
+        "t_regex2.txt:drei\n"
     );
 
     cleanup_test(tmp, "t_regex2.txt", "out_regex2.txt");
@@ -589,10 +592,10 @@ void test_regex_ignore_case() {
     assert(rc == EXIT_SUCCESS);
 
     assert_output_equals(tmp,
-        "Purchase\n"
-        "PURCHASE\n"
-        "purchase\n"
-        "pUrChAsE\n"
+        "t_regex3.txt:Purchase\n"
+        "t_regex3.txt:PURCHASE\n"
+        "t_regex3.txt:purchase\n"
+        "t_regex3.txt:pUrChAsE\n"
     );
 
     cleanup_test(tmp, "t_regex3.txt", "out_regex3.txt");

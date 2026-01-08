@@ -65,7 +65,8 @@ int searchStream(FILE *stream, const char *filename, grep_options_t *opts) {
         }
 
         if (match && !opts->quiet && !opts->list_files && !opts->count_only) {
-            printf("%s:", filename);
+            if (filename != NULL)
+                printf("%s:", filename);
             if (opts->show_line_number)
                 printf("%d:", line_nr);
             printf("%s", line); // \n not needed because line has already own \n
@@ -75,7 +76,7 @@ int searchStream(FILE *stream, const char *filename, grep_options_t *opts) {
             return EXIT_SUCCESS; // In quiet mode: exit immediately without printing anything
         }
 
-        if (opts->list_files) {
+        if (match && opts->list_files) {
             printf("%s\n", filename); //print filename and stop searching this file immediately for -l option
             return EXIT_SUCCESS;
         }
@@ -83,7 +84,8 @@ int searchStream(FILE *stream, const char *filename, grep_options_t *opts) {
     }
 
     if (opts->count_only) {
-        printf("%s:", filename);
+        if (filename != NULL)
+            printf("%s:", filename);
         printf("%d\n", match_count); // print the total match_count if -c is set
     }
 
