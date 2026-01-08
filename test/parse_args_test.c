@@ -1,13 +1,17 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include "../src/parse_args.h"
-#include "../src/grep_options.h"
 
-bool test_basic(void)
+#include "../src/parse_args.h"
+
+#include <stdlib.h>
+
+#include "../src/grep_options.h"
+#include "test_header.h"
+
+int test_basic(void)
 {
     char *argv[] = {
         "grepx",
@@ -17,7 +21,7 @@ bool test_basic(void)
         "file1.txt",
         "file2.txt"
     };
-    int argc = sizeof(argv)/sizeof(argv[0]);
+    int argc = sizeof(argv) / sizeof(argv[0]);
 
     grep_options_t actual = {0};
 
@@ -30,30 +34,22 @@ bool test_basic(void)
     expected.ignore_case = true;
     expected.context = 3;
 
-
     add_string(&expected.patterns, &expected.pattern_count, "foo");
 
     add_string(&expected.paths, &expected.path_count, "file1.txt");
     add_string(&expected.paths, &expected.path_count, "file2.txt");
 
-    //grep_options_print(&actual);
-    //printf("\n");
-    //grep_options_print(&expected);
-
-    bool ok = options_equal(&actual, &expected);
-
-    return ok;
+    return options_equal(&actual, &expected) ? 0 : 1;
 }
 
-
-bool test_implicit(void)
+int test_implicit(void)
 {
     char *argv[] = {
         "grepx",
         "pattern",
         "file1.txt"
     };
-    int argc = sizeof(argv)/sizeof(argv[0]);
+    int argc = sizeof(argv) / sizeof(argv[0]);
 
     grep_options_t actual = {0};
 
@@ -65,18 +61,16 @@ bool test_implicit(void)
     add_string(&expected.patterns, &expected.pattern_count, "pattern");
     add_string(&expected.paths, &expected.path_count, "file1.txt");
 
-    bool ok = options_equal(&actual, &expected);
-
-    return ok;
+    return options_equal(&actual, &expected) ? 0 : 1;
 }
 
-bool test_only_pattern(void)
+int test_only_pattern(void)
 {
     char *argv[] = {
         "grepx",
         "pattern",
     };
-    int argc = sizeof(argv)/sizeof(argv[0]);
+    int argc = sizeof(argv) / sizeof(argv[0]);
 
     grep_options_t actual = {0};
 
@@ -87,21 +81,15 @@ bool test_only_pattern(void)
 
     add_string(&expected.patterns, &expected.pattern_count, "pattern");
 
-    grep_options_print(&actual);
-    printf("\n");
-    grep_options_print(&expected);
-
-    bool ok = options_equal(&actual, &expected);
-
-    return ok;
+    return options_equal(&actual, &expected) ? 0 : 1;
 }
 
-
-bool test_no_args(void)
+int test_no_args(void)
 {
     char *argv[] = {
+        /* keine Argumente */
     };
-    int argc = sizeof(argv)/sizeof(argv[0]);
+    int argc = sizeof(argv) / sizeof(argv[0]);
 
     grep_options_t actual = {0};
 
@@ -110,58 +98,57 @@ bool test_no_args(void)
 
     grep_options_t expected = {0};
 
-    bool ok = options_equal(&actual, &expected);
-
-    return ok;
+    return options_equal(&actual, &expected) ? 0 : 1;
 }
 
-
-bool test_all_flags(void)
+int test_all_flags(void)
 {
     char *argv[] = {
         "grepx",
         "-ivnclqr",
-        "-C","4",
-        "-e","foo",
-        "-e","bar",
-        "f1","f2"
+        "-C", "4",
+        "-e", "foo",
+        "-e", "bar",
+        "f1", "f2"
     };
-    int argc = sizeof(argv)/sizeof(argv[0]);
+    int argc = sizeof(argv) / sizeof(argv[0]);
 
     grep_options_t actual = {0};
     char *endptr = NULL;
     parse(&argc, argv, &actual, endptr);
 
     grep_options_t expected = {0};
-    expected.ignore_case = true;
-    expected.invert_match = true;
+    expected.ignore_case      = true;
+    expected.invert_match     = true;
     expected.show_line_number = true;
-    expected.count_only = true;
-    expected.list_files = true;
-    expected.quiet = true;
-    expected.recursive = true;
-    expected.context = 4;
+    expected.count_only       = true;
+    expected.list_files       = true;
+    expected.quiet            = true;
+    expected.recursive        = true;
+    expected.context          = 4;
 
-    add_string(&expected.patterns,&expected.pattern_count,"foo");
-    add_string(&expected.patterns,&expected.pattern_count,"bar");
+    add_string(&expected.patterns, &expected.pattern_count, "foo");
+    add_string(&expected.patterns, &expected.pattern_count, "bar");
 
-    add_string(&expected.paths,&expected.path_count,"f1");
-    add_string(&expected.paths,&expected.path_count,"f2");
+    add_string(&expected.paths, &expected.path_count, "f1");
+    add_string(&expected.paths, &expected.path_count, "f2");
 
-    return options_equal(&actual,&expected);
+    return options_equal(&actual, &expected) ? 0 : 1;
 }
 
 int main(void)
 {
-    int passed = 0;
-    int total = 5;
+    printf("\n\n=== parse_args.c Test ===\n\n");
 
-    if (test_basic()) passed++; else printf("test_basic() failed\n");
-    if (test_all_flags()) passed++; else printf("test_all_flags() failed\n");
-    if (test_no_args()) passed++; else printf("test_no_args() failed\n");
-    if (test_implicit()) passed++; else printf("test_implicit() failed\n");
-    if (test_only_pattern()) passed++; else printf("test_only_pattern() failed\n");
+    RUN_TEST(test_basic);
+    RUN_TEST(test_all_flags);
+    RUN_TEST(test_no_args);
+    RUN_TEST(test_only_pattern);
+    RUN_TEST(test_implicit);
 
-    printf("\nSummary: %d / %d tests passed\n", passed, total);
-    return passed == total ? 0 : 1;
+    printf("\n=== Summary ===\n");
+    printf("Total tests:   %d\n", total_tests);
+    printf("Failed tests:  %d\n", failed_tests);
+    printf("Passed tests:  %d\n", total_tests - failed_tests);
+    return failed_tests == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

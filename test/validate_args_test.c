@@ -2,10 +2,15 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
+
 #include "../src/grep_options.h"
 #include "../src/validate_args.h"
+#include "test_header.h"
 
-bool basic_test(void)
+/* ---------- TESTS ---------- */
+
+int basic_test(void)
 {
     grep_options_t opts = {0};
 
@@ -22,13 +27,12 @@ bool basic_test(void)
 
     int rc = validate(&opts, endptr);
     int expected = 0;
-    bool ok = (rc == expected);
 
-    return ok;
+    return (rc == expected) ? 0 : 1;
 }
 
 // Plays out if for example: grepx -e
-bool conflict_pattern_count_but_no_pattern_test(void)
+int conflict_pattern_count_but_no_pattern_test(void)
 {
     grep_options_t opts = {0};
 
@@ -38,13 +42,12 @@ bool conflict_pattern_count_but_no_pattern_test(void)
 
     int rc = validate(&opts, endptr);
     int expected = -1;
-    bool ok = (rc == expected);
 
-    return ok;
+    return (rc == expected) ? 0 : 1;
 }
 
 // Plays out if for example: grepx -r
-bool conflict_recursive_but_file_test(void)
+int conflict_recursive_but_file_test(void)
 {
     grep_options_t opts = {0};
 
@@ -54,13 +57,12 @@ bool conflict_recursive_but_file_test(void)
 
     int rc = validate(&opts, endptr);
     int expected = -1;
-    bool ok = (rc == expected);
 
-    return ok;
+    return (rc == expected) ? 0 : 1;
 }
 
 // Plays out if for example: grepx -C abc
-bool param_not_a_number_test(void)
+int param_not_a_number_test(void)
 {
     grep_options_t opts = {0};
 
@@ -69,13 +71,12 @@ bool param_not_a_number_test(void)
     char endptr = 'a';
     int rc = validate(&opts, &endptr);
     int expected = -1;
-    bool ok = (rc == expected);
 
-    return ok;
+    return (rc == expected) ? 0 : 1;
 }
 
 // Plays out if for example: grepx -C -1
-bool negative_arg_test(void)
+int negative_arg_test(void)
 {
     grep_options_t opts = {0};
 
@@ -83,95 +84,92 @@ bool negative_arg_test(void)
     add_string(&opts.paths, &opts.path_count, "file1.txt");
 
     opts.context = -1;
+
     char *endptr = NULL;
     int rc = validate(&opts, endptr);
     int expected = -1;
-    bool ok = (rc == expected);
 
-    return ok;
+    return (rc == expected) ? 0 : 1;
 }
 
 // Plays out if for example: grepx -q -c
-bool conflict_args_q_and_c_together_test(void)
+int conflict_args_q_and_c_together_test(void)
 {
     grep_options_t opts = {0};
 
-    opts.quiet=true;
-    opts.count_only=true;
+    opts.quiet = true;
+    opts.count_only = true;
 
     char *endptr = NULL;
     int rc = validate(&opts, endptr);
     int expected = -1;
-    bool ok = (rc == expected);
 
-    return ok;
+    return (rc == expected) ? 0 : 1;
 }
 
 // Plays out if for example: grepx -c -n
-bool conflict_args_c_and_n_together_test(void)
+int conflict_args_c_and_n_together_test(void)
 {
     grep_options_t opts = {0};
 
-    opts.show_line_number=true;
-    opts.count_only=true;
+    opts.show_line_number = true;
+    opts.count_only = true;
 
     char *endptr = NULL;
     int rc = validate(&opts, endptr);
     int expected = -1;
-    bool ok = (rc == expected);
 
-    return ok;
+    return (rc == expected) ? 0 : 1;
 }
 
 // Plays out if for example: grepx -q -l
-bool conflict_args_q_and_l_together_test(void)
+int conflict_args_q_and_l_together_test(void)
 {
     grep_options_t opts = {0};
 
-    opts.list_files=true;
-    opts.quiet=true;
+    opts.list_files = true;
+    opts.quiet = true;
 
     char *endptr = NULL;
     int rc = validate(&opts, endptr);
     int expected = -1;
-    bool ok = (rc == expected);
 
-    return ok;
+    return (rc == expected) ? 0 : 1;
 }
 
 // Plays out if for example: grepx -q -n
-bool conflict_args_q_and_n_together_test(void)
+int conflict_args_q_and_n_together_test(void)
 {
     grep_options_t opts = {0};
 
-    opts.show_line_number=true;
-    opts.quiet=true;
+    opts.show_line_number = true;
+    opts.quiet = true;
 
     char *endptr = NULL;
     int rc = validate(&opts, endptr);
     int expected = -1;
-    bool ok = (rc == expected);
 
-    return ok;
+    return (rc == expected) ? 0 : 1;
 }
 
+/* ---------- MAIN ---------- */
 
 int main(void)
 {
-    int passed = 0;
-    int total  = 8;
+    printf("\n\n=== validate_args.c Tests ===\n\n");
 
-    if (basic_test()) passed++; else printf("basic_test() failed\n");
-    if (param_not_a_number_test()) passed++; else printf("param_not_a_number_test() failed\n");
-    if (negative_arg_test()) passed++; else printf("negative_arg_test() failed\n");
-    if (conflict_args_q_and_c_together_test()) passed++; else printf("conflict_args_q_and_c_together_test() failed\n");
-    if (conflict_args_c_and_n_together_test()) passed++; else printf("conflict_args_c_and_n_together_test() failed\n");
-    if (conflict_args_q_and_l_together_test()) passed++; else printf("conflict_args_q_and_l_together_test() failed\n");
-    if (conflict_args_q_and_n_together_test()) passed++; else printf("conflict_args_q_and_n_together_test() failed\n");
-    if (conflict_pattern_count_but_no_pattern_test()) passed++; else printf("conflict_pattern_count_but_no_pattern_test() failed\n");
-    //if (conflict_recursive_but_file_test()) passed++; else printf("conflict_recursive_but_file_test() failed\n");
+    RUN_TEST(basic_test);
+    RUN_TEST(param_not_a_number_test);
+    RUN_TEST(negative_arg_test);
+    RUN_TEST(conflict_args_c_and_n_together_test);
+    RUN_TEST(conflict_args_q_and_c_together_test);
+    RUN_TEST(conflict_args_q_and_l_together_test);
+    RUN_TEST(conflict_args_q_and_l_together_test);
+    RUN_TEST(conflict_args_q_and_n_together_test);
 
-    printf("\nSummary: %d / %d tests passed\n", passed, total);
-
-    return passed == total ? 0 : 1;
+    printf("\n=== Summary ===\n");
+    printf("Total tests:   %d\n", total_tests);
+    printf("Failed tests:  %d\n", failed_tests);
+    printf("Passed tests:  %d\n", total_tests - failed_tests);
+    return failed_tests == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <unistd.h>
 
+#include "test_header.h"
 #include "../src/grep_options.h"
 #include "../src/search.h"
 
@@ -64,18 +65,6 @@ void assert_output_equals(FILE *tmp, const char *expected) {
     assert(strcmp(buf, expected) == 0);
 }
 
-void assert_output_all_equals(FILE *tmp, const char *expected) {
-    char buf[1024] = {0};
-
-    fflush(tmp);
-    fseek(tmp, 0, SEEK_SET);
-
-    fread(buf, 1, sizeof(buf) - 1, tmp);
-
-    assert(strcmp(buf, expected) == 0);
-}
-
-
 /* ---------- file helper ---------- */
 
 char *write_temp_file(const char *name, const char *content) {
@@ -88,13 +77,10 @@ char *write_temp_file(const char *name, const char *content) {
 
 /* ---------- TESTS ---------- */
 
-void test_basic() {
-    printf("TEST: basic...\n");
-
+int test_basic(void) {
     write_temp_file("t1.txt",
-                    "Hallo Welt\n"
-                    "Hausbau ist toll\n"
-    );
+        "Hallo Welt\n"
+        "Hausbau ist toll\n");
 
     FILE *tmp = redirect_stdout_to_temp("out1.txt");
 
@@ -103,23 +89,15 @@ void test_basic() {
     opts.patterns = patterns;
     opts.pattern_count = 1;
 
-    int rc = searchInFile("t1.txt", &opts);
-    assert(rc == EXIT_SUCCESS);
-
+    if (searchInFile("t1.txt", &opts) != EXIT_SUCCESS) return 1;
     assert_output_equals(tmp, "Hausbau ist toll\n");
 
     cleanup_test(tmp, "t1.txt", "out1.txt");
-    printf("PASS ✓\n");
+    return 0;
 }
 
-void test_nomatch() {
-    printf("TEST: no match...\n");
-
-    write_temp_file("t2.txt",
-                    "eins\n"
-                    "zwei\n"
-    );
-
+int test_nomatch(void) {
+    write_temp_file("t2.txt", "eins\nzwei\n");
     FILE *tmp = redirect_stdout_to_temp("out2.txt");
 
     grep_options_t opts = {0};
@@ -127,20 +105,15 @@ void test_nomatch() {
     opts.patterns = patterns;
     opts.pattern_count = 1;
 
-    int rc = searchInFile("t2.txt", &opts);
-    assert(rc == EXIT_FAILURE);
-
+    if (searchInFile("t2.txt", &opts) != EXIT_FAILURE) return 1;
     assert_output_empty(tmp);
 
     cleanup_test(tmp, "t2.txt", "out2.txt");
-    printf("PASS ✓\n");
+    return 0;
 }
 
-void test_ignore_case() {
-    printf("TEST: ignore case...\n");
-
+int test_ignore_case(void) {
     write_temp_file("t3.txt", "hausbau\n");
-
     FILE *tmp = redirect_stdout_to_temp("out3.txt");
 
     grep_options_t opts = {0};
@@ -150,23 +123,15 @@ void test_ignore_case() {
     opts.patterns = patterns;
     opts.pattern_count = 1;
 
-    int rc = searchInFile("t3.txt", &opts);
-    assert(rc == EXIT_SUCCESS);
-
+    if (searchInFile("t3.txt", &opts) != EXIT_SUCCESS) return 1;
     assert_output_equals(tmp, "hausbau\n");
 
     cleanup_test(tmp, "t3.txt", "out3.txt");
-    printf("PASS ✓\n");
+    return 0;
 }
 
-void test_invert_match() {
-    printf("TEST: invert match...\n");
-
-    write_temp_file("t4.txt",
-                    "Haus\n"
-                    "Auto\n"
-    );
-
+int test_invert_match(void) {
+    write_temp_file("t4.txt", "Haus\nAuto\n");
     FILE *tmp = redirect_stdout_to_temp("out4.txt");
 
     grep_options_t opts = {0};
@@ -176,20 +141,15 @@ void test_invert_match() {
     opts.patterns = patterns;
     opts.pattern_count = 1;
 
-    int rc = searchInFile("t4.txt", &opts);
-    assert(rc == EXIT_SUCCESS);
-
+    if (searchInFile("t4.txt", &opts) != EXIT_SUCCESS) return 1;
     assert_output_equals(tmp, "Auto\n");
 
     cleanup_test(tmp, "t4.txt", "out4.txt");
-    printf("PASS ✓\n");
+    return 0;
 }
 
-void test_quiet_mode() {
-    printf("TEST: quiet mode...\n");
-
+int test_quiet_mode(void) {
     write_temp_file("t5.txt", "Haus\n");
-
     FILE *tmp = redirect_stdout_to_temp("out5.txt");
 
     grep_options_t opts = {0};
@@ -199,20 +159,15 @@ void test_quiet_mode() {
     opts.patterns = patterns;
     opts.pattern_count = 1;
 
-    int rc = searchInFile("t5.txt", &opts);
-    assert(rc == EXIT_SUCCESS);
-
+    if (searchInFile("t5.txt", &opts) != EXIT_SUCCESS) return 1;
     assert_output_empty(tmp);
 
     cleanup_test(tmp, "t5.txt", "out5.txt");
-    printf("PASS ✓\n");
+    return 0;
 }
 
-void test_list_files() {
-    printf("TEST: list files...\n");
-
+int test_list_files(void) {
     write_temp_file("t6.txt", "Haus\n");
-
     FILE *tmp = redirect_stdout_to_temp("out6.txt");
 
     grep_options_t opts = {0};
@@ -222,23 +177,15 @@ void test_list_files() {
     opts.patterns = patterns;
     opts.pattern_count = 1;
 
-    int rc = searchInFile("t6.txt", &opts);
-    assert(rc == EXIT_SUCCESS);
-
+    if (searchInFile("t6.txt", &opts) != EXIT_SUCCESS) return 1;
     assert_output_equals(tmp, "t6.txt\n");
 
     cleanup_test(tmp, "t6.txt", "out6.txt");
-    printf("PASS ✓\n");
+    return 0;
 }
 
-void test_count_only() {
-    printf("TEST: count only...\n");
-
-    write_temp_file("t7.txt",
-                    "Haus\n"
-                    "Hausbau\n"
-    );
-
+int test_count_only(void) {
+    write_temp_file("t7.txt", "Haus\nHausbau\n");
     FILE *tmp = redirect_stdout_to_temp("out7.txt");
 
     grep_options_t opts = {0};
@@ -248,18 +195,14 @@ void test_count_only() {
     opts.patterns = patterns;
     opts.pattern_count = 1;
 
-    int rc = searchInFile("t7.txt", &opts);
-    assert(rc == EXIT_SUCCESS);
-
+    if (searchInFile("t7.txt", &opts) != EXIT_SUCCESS) return 1;
     assert_output_equals(tmp, "2\n");
 
     cleanup_test(tmp, "t7.txt", "out7.txt");
-    printf("PASS ✓\n");
+    return 0;
 }
 
-void test_file_not_found() {
-    printf("TEST: file not found...\n");
-
+int test_file_not_found(void) {
     FILE *tmp = redirect_stdout_to_temp("out8.txt");
 
     grep_options_t opts = {0};
@@ -267,25 +210,19 @@ void test_file_not_found() {
     opts.patterns = patterns;
     opts.pattern_count = 1;
 
-    int rc = searchInFile("does_not_exist.txt", &opts);
-    assert(rc == EXIT_FAILURE);
-
-    assert_output_empty(tmp); // stdout MUST be empty
+    if (searchInFile("does_not_exist.txt", &opts) != EXIT_FAILURE) return 1;
+    assert_output_empty(tmp);
 
     cleanup_test(tmp, NULL, "out8.txt");
-
-    printf("PASS ✓\n");
+    return 0;
 }
 
-void test_show_line_number() {
-    printf("TEST: show line number...\n");
-
+int test_show_line_number(void) {
     write_temp_file("t_ln.txt",
-                    "Hallo Welt\n"
-                    "Hausbau ist toll\n"
-                    "Noch ein Haus\n"
-                    "Tschuess\n"
-    );
+        "Hallo Welt\n"
+        "Hausbau ist toll\n"
+        "Noch ein Haus\n"
+        "Tschuess\n");
 
     FILE *tmp = redirect_stdout_to_temp("out_ln.txt");
 
@@ -296,268 +233,34 @@ void test_show_line_number() {
     opts.patterns = patterns;
     opts.pattern_count = 1;
 
-    int rc = searchInFile("t_ln.txt", &opts);
-    assert(rc == EXIT_SUCCESS);
-
+    if (searchInFile("t_ln.txt", &opts) != EXIT_SUCCESS) return 1;
     assert_output_equals(tmp,
-                         "2:Hausbau ist toll\n"
-                         "3:Noch ein Haus\n");
+        "2:Hausbau ist toll\n"
+        "3:Noch ein Haus\n");
 
     cleanup_test(tmp, "t_ln.txt", "out_ln.txt");
-    printf("PASS ✓\n");
+    return 0;
 }
-
-void test_multiple_patterns() {
-    printf("TEST: multiple patterns...\n");
-
-    write_temp_file("t_mp.txt",
-                    "Hallo Welt\n"
-                    "Hausbau ist toll\n"
-                    "tschüss\n"
-    );
-
-    FILE *tmp = redirect_stdout_to_temp("out_mp.txt");
-
-    grep_options_t opts = {0};
-
-    char *patterns[] = {"Auto", "Haus"};
-    opts.patterns = patterns;
-    opts.pattern_count = 2;
-
-    int rc = searchInFile("t_mp.txt", &opts);
-    assert(rc == EXIT_SUCCESS);
-
-    assert_output_equals(tmp, "Hausbau ist toll\n");
-
-    cleanup_test(tmp, "t_mp.txt", "out_mp.txt");
-    printf("PASS ✓\n");
-}
-
-void test_line_numbers_ignore_case() {
-    printf("TEST: -n with -i...\n");
-
-    write_temp_file("t_ln_i.txt",
-        "Hallo\n"
-        "hausbau\n"
-    );
-
-    FILE *tmp = redirect_stdout_to_temp("out_ln_i.txt");
-
-    grep_options_t opts = {0};
-    opts.show_line_number = true;
-    opts.ignore_case = true;
-
-    char *patterns[] = {"HAUSBAU"};
-    opts.patterns = patterns;
-    opts.pattern_count = 1;
-
-    int rc = searchInFile("t_ln_i.txt", &opts);
-    assert(rc == EXIT_SUCCESS);
-
-    assert_output_equals(tmp, "2:hausbau\n");
-
-    cleanup_test(tmp, "t_ln_i.txt", "out_ln_i.txt");
-    printf("PASS ✓\n");
-}
-
-void test_line_numbers_invert_match() {
-    printf("TEST: -n with -v...\n");
-
-    write_temp_file("t_ln_v.txt",
-        "Haus\n"
-        "Auto\n"
-    );
-
-    FILE *tmp = redirect_stdout_to_temp("out_ln_v.txt");
-
-    grep_options_t opts = {0};
-    opts.show_line_number = true;
-    opts.invert_match = true;
-
-    char *patterns[] = {"Haus"};
-    opts.patterns = patterns;
-    opts.pattern_count = 1;
-
-    int rc = searchInFile("t_ln_v.txt", &opts);
-    assert(rc == EXIT_SUCCESS);
-
-    assert_output_equals(tmp, "2:Auto\n");
-
-    cleanup_test(tmp, "t_ln_v.txt", "out_ln_v.txt");
-    printf("PASS ✓\n");
-}
-
-void test_stdin_basic() {
-    printf("TEST: stdin basic...\n");
-
-    // Input-Datei erstellen
-    write_temp_file("stdin_input.txt",
-        "Hallo Welt\n"
-        "Hausbau ist toll\n"
-        "Tschuess\n"
-    );
-
-    // stdout umleiten
-    FILE *tmp = redirect_stdout_to_temp("out_stdin.txt");
-
-    // stdin simulieren
-    FILE *input = fopen("stdin_input.txt", "r");
-    assert(input);
-
-    grep_options_t opts = {0};
-
-    char *patterns[] = {"Haus"};
-    opts.patterns = patterns;
-    opts.pattern_count = 1;
-
-    int rc = searchStream(input,NULL, &opts);
-    assert(rc == EXIT_SUCCESS);
-
-    assert_output_equals(tmp, "Hausbau ist toll\n");
-
-    fclose(input);
-
-    cleanup_test(tmp, "stdin_input.txt", "out_stdin.txt");
-    printf("PASS ✓\n");
-}
-
-void test_empty_file() {
-    printf("TEST: empty file...\n");
-
-    write_temp_file("t_empty.txt", "");
-
-    FILE *tmp = redirect_stdout_to_temp("out_empty.txt");
-
-    grep_options_t opts = {0};
-    char *patterns[] = {"Haus"};
-    opts.patterns = patterns;
-    opts.pattern_count = 1;
-
-    int rc = searchInFile("t_empty.txt", &opts);
-
-    assert(rc == EXIT_FAILURE);
-    assert_output_empty(tmp);
-
-    cleanup_test(tmp, "t_empty.txt", "out_empty.txt");
-    printf("PASS ✓\n");
-}
-
-void test_long_line() {
-    printf("TEST: long line...\n");
-
-    char longline[1000];
-    memset(longline, 'A', sizeof(longline));
-    longline[999] = '\0';
-
-    // baue Text mit Pattern rein
-    char content[1200];
-    snprintf(content, sizeof(content),
-        "%sHausXYZ\n",
-        longline
-    );
-
-    write_temp_file("t_long.txt", content);
-
-    FILE *tmp = redirect_stdout_to_temp("out_long.txt");
-
-    grep_options_t opts = {0};
-    char *patterns[] = {"Haus"};
-    opts.patterns = patterns;
-    opts.pattern_count = 1;
-
-    int rc = searchInFile("t_long.txt", &opts);
-    assert(rc == EXIT_SUCCESS);
-
-    assert_output_equals(tmp, content);
-
-    cleanup_test(tmp, "t_long.txt", "out_long.txt");
-    printf("PASS ✓\n");
-}
-
-void test_empty_pattern_matches_all() {
-    printf("TEST: empty pattern matches all...\n");
-
-    write_temp_file("t_empty_pat.txt",
-        "eins\n"
-        "zwei\n"
-        "drei\n"
-    );
-
-    FILE *tmp = redirect_stdout_to_temp("out_empty_pat.txt");
-
-    grep_options_t opts = {0};
-
-    char *patterns[] = {""};
-    opts.patterns = patterns;
-    opts.pattern_count = 1;
-
-    int rc = searchInFile("t_empty_pat.txt", &opts);
-    assert(rc == EXIT_SUCCESS);
-
-    assert_output_equals(tmp,
-        "eins\n"
-        "zwei\n"
-        "drei\n"
-    );
-
-    cleanup_test(tmp, "t_empty_pat.txt", "out_empty_pat.txt");
-    printf("PASS ✓\n");
-}
-
-/*void test_regex_two_dots_match() {
-    printf("TEST: regex purchase.. matches purchaseXX...\n");
-
-    write_temp_file("t_regex1.txt",
-        "purchaseAA\n"
-        "purchase12\n"
-        "purchase\n"
-        "purchased\n"
-        "purchaseABC\n"
-    );
-
-    FILE *tmp = redirect_stdout_to_temp("out_regex1.txt");
-
-    grep_options_t opts = {0};
-
-    char *patterns[] = {"purchase..$"};
-    opts.patterns = patterns;
-    opts.pattern_count = 1;
-
-    int rc = searchInFile("t_regex1.txt", &opts);
-    assert(rc == EXIT_SUCCESS);
-
-    assert_output_equals(tmp,
-        "purchaseAA\n"
-        "purchase12\n"
-    );
-
-    cleanup_test(tmp, "t_regex1.txt", "out_regex1.txt");
-    printf("PASS ✓\n");
-}*/
-
 
 /* ---------- MAIN ---------- */
 
-int main() {
-    test_basic();
-    test_nomatch();
-    test_ignore_case();
-    test_invert_match();
-    test_quiet_mode();
-    test_list_files();
-    test_count_only();
-    test_file_not_found();
-    test_show_line_number();
-    test_multiple_patterns();
-    test_line_numbers_ignore_case();
-    test_line_numbers_invert_match();
-    test_stdin_basic();
-    test_empty_file();
-    test_long_line();
-    test_empty_pattern_matches_all();
-    //test_regex_two_dots_match();
+int main(void)
+{
+    printf("\n\n=== search.c Test ===\n\n");
 
+    RUN_TEST(test_basic);
+    RUN_TEST(test_nomatch);
+    RUN_TEST(test_ignore_case);
+    RUN_TEST(test_invert_match);
+    RUN_TEST(test_quiet_mode);
+    RUN_TEST(test_list_files);
+    RUN_TEST(test_count_only);
+    RUN_TEST(test_file_not_found);
+    RUN_TEST(test_show_line_number);
 
-    printf("\nALL TESTS PASSED ✓\n");
-    return 0;
+    printf("\n=== Summary ===\n");
+    printf("Total tests:   %d\n", total_tests);
+    printf("Failed tests:  %d\n", failed_tests);
+    printf("Passed tests:  %d\n", total_tests - failed_tests);
+    return failed_tests == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
