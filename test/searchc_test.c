@@ -504,7 +504,7 @@ void test_empty_pattern_matches_all() {
     printf("PASS ✓\n");
 }
 
-/*void test_regex_two_dots_match() {
+void test_regex_two_dots_match() {
     printf("TEST: regex purchase.. matches purchaseXX...\n");
 
     write_temp_file("t_regex1.txt",
@@ -533,7 +533,93 @@ void test_empty_pattern_matches_all() {
 
     cleanup_test(tmp, "t_regex1.txt", "out_regex1.txt");
     printf("PASS ✓\n");
-}*/
+}
+
+void test_regex_match_all() {
+    printf("TEST: regex .* matches all...\n");
+
+    write_temp_file("t_regex2.txt",
+        "eins\n"
+        "zwei\n"
+        "drei\n"
+    );
+
+    FILE *tmp = redirect_stdout_to_temp("out_regex2.txt");
+
+    grep_options_t opts = {0};
+
+    char *patterns[] = {".*"};
+    opts.patterns = patterns;
+    opts.pattern_count = 1;
+
+    int rc = searchInFile("t_regex2.txt", &opts);
+    assert(rc == EXIT_SUCCESS);
+
+    assert_output_equals(tmp,
+        "eins\n"
+        "zwei\n"
+        "drei\n"
+    );
+
+    cleanup_test(tmp, "t_regex2.txt", "out_regex2.txt");
+    printf("PASS ✓\n");
+}
+
+void test_regex_ignore_case() {
+    printf("TEST: regex ignore-case works...\n");
+
+    write_temp_file("t_regex3.txt",
+        "Purchase\n"
+        "PURCHASE\n"
+        "purchase\n"
+        "pUrChAsE\n"
+        "nopurchase\n"
+    );
+
+    FILE *tmp = redirect_stdout_to_temp("out_regex3.txt");
+
+    grep_options_t opts = {0};
+    opts.ignore_case = true;
+
+    char *patterns[] = {"^purchase$"};
+    opts.patterns = patterns;
+    opts.pattern_count = 1;
+
+    int rc = searchInFile("t_regex3.txt", &opts);
+    assert(rc == EXIT_SUCCESS);
+
+    assert_output_equals(tmp,
+        "Purchase\n"
+        "PURCHASE\n"
+        "purchase\n"
+        "pUrChAsE\n"
+    );
+
+    cleanup_test(tmp, "t_regex3.txt", "out_regex3.txt");
+    printf("PASS ✓\n");
+}
+
+void test_regex_no_match_returns_failure() {
+    printf("TEST: regex no match returns failure...\n");
+
+    write_temp_file("t_regex4.txt",
+        "foo\n"
+        "bar\n"
+    );
+
+    grep_options_t opts = {0};
+
+    char *patterns[] = {"baz.*"};
+    opts.patterns = patterns;
+    opts.pattern_count = 1;
+
+    int rc = searchInFile("t_regex4.txt", &opts);
+    assert(rc == EXIT_FAILURE);
+
+    remove("t_regex4.txt");
+
+    printf("PASS ✓\n");
+}
 
 
 /* ---------- MAIN ---------- */
@@ -555,7 +641,10 @@ int main() {
     test_empty_file();
     test_long_line();
     test_empty_pattern_matches_all();
-    //test_regex_two_dots_match();
+    test_regex_two_dots_match();
+    test_regex_match_all();
+    test_regex_ignore_case();
+    test_regex_no_match_returns_failure();
 
 
     printf("\nALL TESTS PASSED ✓\n");

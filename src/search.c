@@ -5,12 +5,39 @@
 #include <stdbool.h>
 #include "grep_options.h"
 #include "search.h"
+#include "regex.h"
 
-static bool line_matches(const char *line, const char *pattern, bool ignore_case) {
+// remove new line for matching because \n counts as a match
+static void remove_newline(char *buf, size_t bufsize, char *line) {
+    strncpy(buf, line, bufsize-1);
+    buf[bufsize - 1] = '\0';
+
+    size_t len = strlen(buf);
+    if (len > 0 && buf[len - 1] == '\n')
+        buf[len - 1] = '\0';
+}
+
+static bool line_matches(const char *line, const char *pattern, bool ignore_case)
+{
+    // an empty pattern is always a match
+    if (pattern == NULL || pattern[0] == '\0')
+        return true;
+    char buf[1024];
+    remove_newline(buf,1024, line);
+
+    regex_t regex;
+    int flags = REG_NOSUB;   // wir brauchen keine Gruppen
+
     if (ignore_case)
-        return strcasestr(line, pattern) != NULL;
-    else
-        return strstr(line, pattern) != NULL;
+        flags |= REG_ICASE;
+
+    if (regcomp(&regex, pattern, flags) != 0)
+        return false;  // ungültiger Regex
+
+    int rc = regexec(&regex, buf, 0, NULL, 0);
+    regfree(&regex);
+
+    return rc == 0;
 }
 
 int searchStream(FILE *stream, const char *filename, grep_options_t *opts) {
