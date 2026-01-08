@@ -8,7 +8,7 @@
 #include "regex.h"
 
 // remove new line for matching because \n counts as a match
-static void remove_newline(char *buf, size_t bufsize, char *line) {
+static void remove_newline(char *buf, size_t bufsize, const char *line) {
     strncpy(buf, line, bufsize-1);
     buf[bufsize - 1] = '\0';
 
@@ -65,6 +65,7 @@ int searchStream(FILE *stream, const char *filename, grep_options_t *opts) {
         }
 
         if (match && !opts->quiet && !opts->list_files && !opts->count_only) {
+            printf("%s:", filename);
             if (opts->show_line_number)
                 printf("%d:", line_nr);
             printf("%s", line); // \n not needed because line has already own \n
@@ -82,6 +83,7 @@ int searchStream(FILE *stream, const char *filename, grep_options_t *opts) {
     }
 
     if (opts->count_only) {
+        printf("%s:", filename);
         printf("%d\n", match_count); // print the total match_count if -c is set
     }
 
