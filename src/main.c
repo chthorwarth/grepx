@@ -8,6 +8,7 @@
 
 #include "files.h"
 #include "grep_options.h"
+#include "linux_return_codes.h"
 #include "parse_args.h"
 #include "validate_args.h"
 #include "search.h"
@@ -20,7 +21,8 @@ int main(int argc, char *argv[]) {
     Queue *q = createQueue();
 
     parse(&argc, argv, &opts, context_endptr);
-    validate(&opts, context_endptr);
+    if (validate(&opts, context_endptr) == -1)
+        return ERROR;
 
     // RECURSIVE
     if (opts.recursive) {

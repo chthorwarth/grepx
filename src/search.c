@@ -73,7 +73,7 @@ int searchStream(FILE *stream, const char *filename, grep_options_t *opts) {
         }
 
         if (opts->quiet) {
-            return EXIT_SUCCESS; // In quiet mode: exit immediately without printing anything
+            return found_any ? EXIT_SUCCESS : EXIT_FAILURE; // In quiet mode: exit immediately without printing anything
         }
 
         if (match && opts->list_files) {
