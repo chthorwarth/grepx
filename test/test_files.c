@@ -1,45 +1,110 @@
-//
-// Created by luke on 21.12.25.
-//
-
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "../src/files.h"
 #include <string.h>
+#include <unistd.h>
+#include "../src/queue.h"
 
-int testExploreDirectories()
+#define RUN_TEST(test_fn)                 \
+    do                                    \
+    {                                     \
+        total_tests++;                    \
+        if (test_fn() != 0) {             \
+            failed_tests++;               \
+            printf("[FAIL] %s\n", #test_fn); \
+        } else {                          \
+            printf("[ OK ] %s\n", #test_fn); \
+        }                                 \
+    } while (0)
+
+static int total_tests = 0;
+static int failed_tests = 0;
+
+int exploreDirectories(const char *path, Queue *q);
+
+static void createFile(const char *path)
 {
-    FILE *originalStdout = stdout;
-    FILE *tmp = tmpfile();
-    if (!tmp) return 0;
-
-    stdout = tmp;
-
-    int result = exploreDirectories(".");
-
-    fflush(tmp);
-    fseek(tmp, 0, SEEK_SET);
-
-    char buffer[1024];
-    int foundMain = 0;
-    while (fgets(buffer, sizeof(buffer), tmp))
-    {
-        if (strstr(buffer, "main.c"))
-            foundMain = 1;
+    FILE *f = fopen(path, "w");
+    if (!f) {
+        perror(path);
+        exit(1);
     }
-
-    fclose(tmp);
-    stdout = originalStdout;
-
-    return result == EXIT_SUCCESS && foundMain;
+    fprintf(f, "test\n");
+    fclose(f);
 }
 
-int main()
+static void createDir(const char *path)
 {
-    if (testExploreDirectories())
-        printf("TEST SUCCEEDED\n");
-    else
-        printf("TEST FAILED\n");
+    char cmd[512];
+    snprintf(cmd, sizeof(cmd), "mkdir -p %s", path);
+    int r = system(cmd);
+    if (r != 0)
+    {
+        perror(path); exit(1);
+    }
+}
+
+static int queueContains(Queue *q, const char *path)
+{
+    Element *e = q->head;
+    while (e)
+    {
+        if (strcmp(e->path, path) == 0) return 1;
+        e = e->next;
+    }
     return 0;
+}
+
+int test_exploreDirectories()
+{
+    // temporally directory
+    const char *root = "./test_root";
+    createDir(root);
+
+    createFile("./test_root/file1.txt");
+    createFile("./test_root/file2.txt");
+    createDir("./test_root/subdir");
+    createFile("./test_root/subdir/file3.txt");
+
+    Queue *q = createQueue();
+    if (!q) return 1;
+
+    int res = exploreDirectories(root, q);
+    if (res != 0) return 1;
+
+    int ok = 1;
+    if (!queueContains(q, "./test_root/file1.txt")) ok = 0;
+    if (!queueContains(q, "./test_root/file2.txt")) ok = 0;
+    if (!queueContains(q, "./test_root/subdir/file3.txt")) ok = 0;
+
+    if (!ok)
+    {
+        printf("Queue does not contain:\n");
+        printQueue(q);
+        freeQueue(q);
+        return 1;
+    }
+
+    freeQueue(q);
+
+    unlink("./test_root/file1.txt");
+    unlink("./test_root/file2.txt");
+    unlink("./test_root/subdir/file3.txt");
+    system("rmdir ./test_root/subdir");
+    system("rmdir ./test_root");
+
+    return 0;
+}
+
+int main(void)
+{
+    printf("=== ExploreDirectories Test ===\n\n");
+
+    RUN_TEST(test_exploreDirectories);
+
+    printf("\n=== Summary ===\n");
+    printf("Total tests:   %d\n", total_tests);
+    printf("Failed tests:  %d\n", failed_tests);
+    printf("Passed tests:  %d\n", total_tests - failed_tests);
+
+    return failed_tests == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

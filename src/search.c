@@ -5,111 +5,106 @@
 #include <stdbool.h>
 #include "grep_options.h"
 #include "search.h"
+#include "regex.h"
 
-int searchInFile(const char *filename, grep_options_t *opts) {
-FILE *file = fopen(filename, "r");
-    
-    if (!file) {
-        //Only print error if NOT in quiet mode
-        if (!opts->quiet) {
-            perror(filename);
-        }
-        return EXIT_FAILURE;
-    }
+// remove new line for matching because \n counts as a match
+static void remove_newline(char *buf, size_t bufsize, const char *line) {
+    strncpy(buf, line, bufsize-1);
+    buf[bufsize - 1] = '\0';
 
+    size_t len = strlen(buf);
+    if (len > 0 && buf[len - 1] == '\n')
+        buf[len - 1] = '\0';
+}
+
+static bool line_matches(const char *line, const char *pattern, bool ignore_case)
+{
+    // an empty pattern is always a match
+    if (pattern == NULL || pattern[0] == '\0')
+        return true;
+    char buf[1024];
+    remove_newline(buf,1024, line);
+
+    regex_t regex;
+    int flags = REG_NOSUB;   // wir brauchen keine Gruppen
+
+    if (ignore_case)
+        flags |= REG_ICASE;
+
+    if (regcomp(&regex, pattern, flags) != 0)
+        return false;  // ungültiger Regex
+
+    int rc = regexec(&regex, buf, 0, NULL, 0);
+    regfree(&regex);
+
+    return rc == 0;
+}
+
+int searchStream(FILE *stream, const char *filename, grep_options_t *opts) {
     char line[1024];
     int line_nr = 1;
     int match_count = 0;
     int print_after_counter = 0;        // Keeps track of how many trailing context lines to print
     bool found_any = false;
 
-    // asign memory for before context lines if -C is set
-    char **before_context = NULL;
-    if (opts->context > 0) {
-        before_context = calloc(opts->context,sizeof(char *));      // calloc is used to initialize all pointers to NULL
-    }
-    int buffer_index = 0;
-
-    while (fgets(line, sizeof(line), file)) {
+    while (fgets(line, sizeof(line), stream)) {
         bool match = false;
-        
+
         for (int i = 0; i < opts->pattern_count; i++) {
-            if (opts->ignore_case) {
-                if (strcasestr(line, opts->patterns[i]) != NULL) {          // Case-insensitive substring search(GNU extension)
-                    match = true;
-                    break;
-                }
-            } else {
-                if (strstr(line, opts->patterns[i]) != NULL) {
-                    match = true;
-                    break;
-                }
+            if (line_matches(line, opts->patterns[i], opts->ignore_case)) {
+                match = true;
+                break;
             }
         }
 
-        if (match != opts->invert_match) {      // Output line if it matches the search criteria (considering -v for inverted results)
+        if (opts->invert_match)
+            match = !match;
+
+        if (match) {
             found_any = true;
-            
-            if (opts->quiet) {
-                fclose(file);                   // In quiet mode: exit immediately without printing anything
-                return EXIT_SUCCESS;
-            }
-
-            if (opts->list_files) {
-                printf("%s\n", filename);       //print filename and stop searching this file immediately for -l option
-                fclose(file);
-                return EXIT_SUCCESS;
-            }
             match_count++;
+        }
 
+        if (match && !opts->quiet && !opts->list_files && !opts->count_only) {
+            if (filename != NULL)
+                printf("%s:", filename);
+            if (opts->show_line_number)
+                printf("%d:", line_nr);
+            printf("%s", line); // \n not needed because line has already own \n
+        }
 
-            if (!opts->count_only) {
-                if (opts->recursive || opts->path_count > 1) {
-                    printf("%s:", filename);                    //print filename prefix if recursive or multiple paths
-                }
+        if (opts->quiet) {
+            return EXIT_SUCCESS; // In quiet mode: exit immediately without printing anything
+        }
 
-                if (before_context) {
-                    for (int i = 0; i < opts->context; i++) {
-                        int idx = (buffer_index + i) % opts->context;       // Index hops to 0, if the end of the buffer is reached
-                        if (before_context[idx] != NULL) {
-                            printf("%s", before_context[idx]);              // Print stored context lines
-                            free(before_context[idx]);                      // Free memoryafter printing
-                            before_context[idx] = NULL;                     // Free Pointer to prevent double free
-                        }
-                    }
-                }
-
-                if (opts->show_line_number) {
-                    printf("%d:", line_nr);         // If -n is set, prefix the output with the current line number
-                }
-                printf("%s", line);
-                }
-                print_after_counter = opts->context;  
-            } 
-            // No match case
-            else {  
-                if (print_after_counter > 0 && !opts->count_only) {
-                    printf("%s", line);
-                    print_after_counter--;
-                } 
-                else if (opts->context > 0) {
-                    // store line in circular buffer for potential future matches
-                    if (before_context[buffer_index]) free(before_context[buffer_index]);   // free old line before overwriting
-                    before_context[buffer_index] = strdup(line);                   // duplicate line into buffer
-                    buffer_index = (buffer_index + 1) % opts->context;          // advance the ring index
-                }
+        if (match && opts->list_files) {
+            printf("%s\n", filename); //print filename and stop searching this file immediately for -l option
+            return EXIT_SUCCESS;
         }
         line_nr++;
     }
 
-    if (before_context) {
-        // Final cleanup of any remaining context buffer memory
-        for (int i = 0; i < opts->context; i++) {
-            if (before_context[i]) free(before_context[i]);
-        }
-        free(before_context);
+    if (opts->count_only) {
+        if (filename != NULL)
+            printf("%s:", filename);
+        printf("%d\n", match_count); // print the total match_count if -c is set
     }
-    
+
+    return found_any ? EXIT_SUCCESS : EXIT_FAILURE; // Return 0 (Success) if found, 1 (Failure) if not
+}
+
+int searchInFile(const char *filename, grep_options_t *opts)
+{
+    FILE *file = fopen(filename, "r");
+
+    if (!file) {
+        if (!opts->quiet)
+            perror(filename);
+        return EXIT_FAILURE;
+    }
+
+    int rc = searchStream(file, filename, opts);
+
     fclose(file);
-    return found_any ? EXIT_SUCCESS : EXIT_FAILURE; // Return 0 if found, 1 if not
+    return rc;
 }

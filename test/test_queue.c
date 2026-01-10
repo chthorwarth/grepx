@@ -1,39 +1,165 @@
-//
-// Created by luke on 21.12.25.
-//
-
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
 #include "../src/queue.h"
 
-int main(void)
+#define RUN_TEST(test_fn)                 \
+    do                                    \
+    {                                     \
+        total_tests++;                    \
+        if (test_fn() != 0) {             \
+            failed_tests++;               \
+            printf("[FAIL] %s\n", #test_fn); \
+        } else {                          \
+            printf("[ OK ] %s\n", #test_fn); \
+        }                                 \
+    } while (0)
+
+static int total_tests = 0;
+static int failed_tests = 0;
+
+
+int test_createQueue()
 {
     Queue *q = createQueue();
-    FILE *f1 = fopen("Makefile", "r");
-    FILE *f2 = fopen("test/test_queue.c", "r");
-    FILE *f3 = fopen("test/test.txt", "r");
+    if (!q)
+        return 1;
 
+    if (q->head != NULL || q->tail != NULL)
+        return 1;
 
-    if (!f1) perror("Fehler beim Öffnen von Makefile");
-    if (!f2) perror("Fehler beim Öffnen von test_queue.c");
-    if (!f3) perror("Fehler beim Öffnen von test.txt");
+    freeQueue(q);
+    return 0;
+}
 
-    enqueue(q, f1);
-    enqueue(q, f2);
-    enqueue(q, f3);
+int test_isQueueEmpty_on_new_queue()
+{
+    Queue *q = createQueue();
+    int result = isQueueEmpty(q);
+    freeQueue(q);
+    return result == 1 ? 0 : 1;
+}
 
-    printf("Queue nach enqueue:\n");
-    printQueue(q);
+int test_dequeue_empty_queue()
+{
+    Queue *q = createQueue();
+    char *p = dequeue(q);
+    freeQueue(q);
+    return p == NULL ? 0 : 1;
+}
 
-    FILE *file;
-    while ((file = dequeue(q)) != NULL)
-    {
-        printf("Dequeued file pointer: %p\n", (void*)file);
-        fclose(file);
-    }
+int test_enqueue_single_element()
+{
+    Queue *q = createQueue();
+
+    if (!q)
+        return 1;
+
+    char *p = malloc(strlen("file1.txt") + 1);
+    if (!p) return 1;
+    strcpy(p, "file1.txt");
+
+    enqueue(q, p);
+
+    if (!q->head || !q->tail) return 1;
+    if (q->head != q->tail) return 1;
+    if (strcmp(q->head->path, "file1.txt") != 0) return 1;
 
     freeQueue(q);
 
     return 0;
+}
+
+int test_enqueue_dequeue_fifo(void)
+{
+    Queue *q = createQueue();
+
+    char *a = malloc(strlen("a.txt")+1); strcpy(a, "a.txt"); enqueue(q, a);
+    char *b = malloc(strlen("b.txt")+1); strcpy(b, "b.txt"); enqueue(q, b);
+    char *c = malloc(strlen("c.txt")+1); strcpy(c, "c.txt"); enqueue(q, c);
+
+    char *p;
+
+    p = dequeue(q); if (!p || strcmp(p, "a.txt") != 0) return 1; free(p);
+    p = dequeue(q); if (!p || strcmp(p, "b.txt") != 0) return 1; free(p);
+    p = dequeue(q); if (!p || strcmp(p, "c.txt") != 0) return 1; free(p);
+
+    if (dequeue(q) != NULL) return 1;
+
+    freeQueue(q);
+    return 0;
+}
+
+int test_queueSize()
+{
+    Queue *q = createQueue();
+
+    if (queueSize(q) != 0) return 1;
+
+    char *a = malloc(strlen("x") + 1);
+    if (!a) return 1;
+    strcpy(a, "x");
+
+    char *b = malloc(strlen("y") + 1);
+    if (!b) {
+        free(a);
+        return 1;
+    }
+
+    strcpy(b, "y");
+
+    enqueue(q, a);
+    enqueue(q, b);
+
+    if (queueSize(q) != 2) return 1;
+
+    char *p = dequeue(q);
+    free(p);
+
+    if (queueSize(q) != 1) return 1;
+
+    freeQueue(q);
+    return 0;
+}
+
+int test_tail_null_after_last_dequeue(void)
+{
+    Queue *q = createQueue();
+
+    char *last = malloc(strlen("last") + 1);
+    if (!last) return 1;
+    strcpy(last, "last");
+
+    enqueue(q, last);
+
+    char *p = dequeue(q);
+    free(p);
+
+    if (q->head != NULL) return 1;
+    if (q->tail != NULL) return 1;
+
+    freeQueue(q);
+    return 0;
+}
+
+
+int main(void)
+{
+    printf("=== Queue Test ===\n\n");
+
+    RUN_TEST(test_createQueue);
+    RUN_TEST(test_isQueueEmpty_on_new_queue);
+    RUN_TEST(test_dequeue_empty_queue);
+    RUN_TEST(test_enqueue_single_element);
+    RUN_TEST(test_enqueue_dequeue_fifo);
+    RUN_TEST(test_queueSize);
+    RUN_TEST(test_tail_null_after_last_dequeue);
+
+    printf("\n=== Summary ===\n");
+    printf("Total tests:   %d\n", total_tests);
+    printf("Failed tests:  %d\n", failed_tests);
+    printf("Passed tests:  %d\n", total_tests - failed_tests);
+
+    return failed_tests == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

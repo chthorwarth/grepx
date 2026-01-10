@@ -1,12 +1,9 @@
-#ifndef FILE_QUEUE_H
-#define FILE_QUEUE_H
-
-#include <stdio.h>
-
+#ifndef QUEUE_H
+#define QUEUE_H
 
 typedef struct element
 {
-    FILE *file;
+    char *path;
     struct element *next;
 } Element;
 
@@ -18,16 +15,18 @@ typedef struct queue
 
 Queue *createQueue(void);
 
+int isQueueEmpty(const Queue *q);
+
 void freeQueue(Queue *q);
 
-void enqueue(Queue *q, FILE *file);
+void enqueue(Queue *q, char *path);
 
-FILE *dequeue(Queue *q);
+char *dequeue(Queue *q);
 
 void printQueue(const Queue *q);
 
 int queueSize(const Queue *q);
 
-int isQueueEmpty(const Queue *q);
+
 
 #endif

@@ -1,22 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-typedef struct element
-{
-	FILE *file;
-	struct element *next;
-} Element;
-
-typedef struct queue
-{
-	Element *head;
-	Element *tail;
-} Queue;
-
+#include "queue.h"
 
 Queue *createQueue(void)
 {
 	Queue *q = malloc(sizeof(Queue));
+	if (!q) return NULL;
 	q->head = NULL;
 	q->tail = NULL;
 	return q;
@@ -24,21 +13,24 @@ Queue *createQueue(void)
 
 void freeQueue(Queue *q)
 {
-	Element *current = q->head;
-	while (current)
+	if (!q) return;
+
+	while (!isQueueEmpty(q))
 	{
-		Element *next = current->next;
-		free(current);
-		current = next;
+		char *path = dequeue(q);
+		free(path);
 	}
-	q->head = q->tail = NULL;
+
 	free(q);
 }
 
-void enqueue(Queue *q, FILE *file)
+void enqueue(Queue *q, char *path)
 {
+	if (!q || !path) return;
+
 	Element *newElem = malloc(sizeof(Element));
-	newElem->file = file;
+	if (!newElem) return;
+	newElem->path = path;
 	newElem->next = NULL;
 
 	if (q->tail)
@@ -52,26 +44,44 @@ void enqueue(Queue *q, FILE *file)
 	}
 }
 
-FILE *dequeue(Queue *q)
+char *dequeue(Queue *q)
 {
-	if (!q->head)
-		return NULL;
+	if (!q->head) return NULL;
 
 	Element *tmp = q->head;
-	FILE *file = tmp->file;
+	char *path = tmp->path;
 	q->head = q->head->next;
 	if (!q->head)
 		q->tail = NULL;
 	free(tmp);
-	return file;
+	return path;
 }
-
 void printQueue(const Queue *q)
 {
+	if (!q)
+	{
+		printf("(Queue is NULL)\n");
+		return;
+	}
+
+	if (!q->head)
+	{
+		printf("(Queue is empty)\n");
+		return;
+	}
+
 	Element *current = q->head;
-	while (current) {
-		printf("%p\n", (void*)current->file);
+	int index = 0;
+
+	while (current)
+	{
+		if (current->path)
+			printf("[%d] %s\n", index, current->path);
+		else
+			printf("[%d] (NULL path)\n", index);
+
 		current = current->next;
+		index++;
 	}
 }
 
