@@ -144,9 +144,7 @@ int main(void)
     RUN_TEST(test_only_pattern);
     RUN_TEST(test_implicit);
 
-    printf("\n=== Summary ===\n");
-    printf("Total tests:   %d\n", total_tests);
-    printf("Failed tests:  %d\n", failed_tests);
-    printf("Passed tests:  %d\n", total_tests - failed_tests);
+    printSummary();
+
     return failed_tests == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

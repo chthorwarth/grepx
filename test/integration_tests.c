@@ -294,11 +294,7 @@ int main() {
     RUN_TEST(test_conflicting_options);
     RUN_TEST(test_invalid_option);
 
-    printf("\n=== Summary ===\n");
-    printf("Total tests:   %d\n", total_tests);
-    printf("Failed tests:  %d\n", failed_tests);
-    printf("Passed tests:  %d\n", total_tests - failed_tests);
-
+    printSummary();
     // Return status based on failure count
     return (failed_tests > 0) ? EXIT_FAILURE : EXIT_SUCCESS;
 }

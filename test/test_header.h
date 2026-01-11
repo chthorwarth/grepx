@@ -22,4 +22,11 @@
 static int total_tests = 0;
 static int failed_tests = 0;
 
+static inline void printSummary()
+{
+    printf("\n=== Summary ===\n");
+    printf("Total tests:   %d\n", total_tests);
+    printf("Failed tests:  %d\n", failed_tests);
+    printf("Passed tests:  %d\n", total_tests - failed_tests);
+}
 #endif //GREPX_TEST_HEADER_H
