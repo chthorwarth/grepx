@@ -2,22 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "test_header.h"
 #include "../src/queue.h"
-
-#define RUN_TEST(test_fn)                 \
-    do                                    \
-    {                                     \
-        total_tests++;                    \
-        if (test_fn() != 0) {             \
-            failed_tests++;               \
-            printf("[FAIL] %s\n", #test_fn); \
-        } else {                          \
-            printf("[ OK ] %s\n", #test_fn); \
-        }                                 \
-    } while (0)
-
-static int total_tests = 0;
-static int failed_tests = 0;
 
 int exploreDirectories(const char *path, Queue *q);
 
@@ -97,7 +83,7 @@ int test_exploreDirectories()
 
 int main(void)
 {
-    printf("=== ExploreDirectories Test ===\n\n");
+    printf("\n\n=== files.c Test ===\n\n");
 
     RUN_TEST(test_exploreDirectories);
 
@@ -105,6 +91,5 @@ int main(void)
     printf("Total tests:   %d\n", total_tests);
     printf("Failed tests:  %d\n", failed_tests);
     printf("Passed tests:  %d\n", total_tests - failed_tests);
-
     return failed_tests == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
