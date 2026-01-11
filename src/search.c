@@ -44,7 +44,6 @@ int searchStream(FILE *stream, const char *filename, grep_options_t *opts) {
     char line[1024];
     int line_nr = 1;
     int match_count = 0;
-    int print_after_counter = 0;        // Keeps track of how many trailing context lines to print
     bool found_any = false;
 
     while (fgets(line, sizeof(line), stream)) {
@@ -74,7 +73,7 @@ int searchStream(FILE *stream, const char *filename, grep_options_t *opts) {
         }
 
         if (opts->quiet) {
-            return EXIT_SUCCESS; // In quiet mode: exit immediately without printing anything
+            return found_any ? EXIT_SUCCESS : EXIT_FAILURE; // In quiet mode: exit immediately without printing anything
         }
 
         if (match && opts->list_files) {

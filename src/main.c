@@ -20,7 +20,10 @@ int main(int argc, char *argv[]) {
     Queue *q = createQueue();
 
     parse(&argc, argv, &opts, context_endptr);
-    validate(&opts, context_endptr);
+    if (validate(&opts, context_endptr) != 0) {
+        freeQueue(q);
+        return EXIT_FAILURE;
+    }
 
     // RECURSIVE
     if (opts.recursive) {
