@@ -25,9 +25,6 @@ typedef struct {
     int path_count;
 } grep_options_t;
 
-// TODO
-void grep_options_init(grep_options_t *opts);
-// TODO
 void grep_options_free(grep_options_t *opts);
 void add_string(char ***array, int *count, const char *value);
 void grep_options_print(grep_options_t *opts);

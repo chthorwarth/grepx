@@ -23,6 +23,7 @@ int main(int argc, char *argv[]) {
     parse(&argc, argv, &opts, context_endptr);
     if (validate(&opts, context_endptr) != 0) {
         freeQueue(q);
+        grep_options_free(&opts);
         return EXIT_FAILURE;
     }
 
@@ -41,8 +42,11 @@ int main(int argc, char *argv[]) {
     // STDIN
     if (opts.path_count == 0){
         freeQueue(q);
-        return searchStream(stdin, NULL, &opts);
+        int rtrn = searchStream(stdin, NULL, &opts);
+        grep_options_free(&opts);
+        return rtrn;
     }
+    grep_options_free(&opts);
     freeQueue(q);
     return 0;
 }

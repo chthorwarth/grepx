@@ -67,3 +67,29 @@ bool options_equal(const grep_options_t *a, const grep_options_t *b)
         return false;
     return true;
 }
+
+void grep_options_free(grep_options_t *opts)
+{
+    if (!opts) return;
+
+    // Free patterns
+    if (opts->patterns) {
+        for (int i = 0; i < opts->pattern_count; i++) {
+            free(opts->patterns[i]);
+        }
+        free(opts->patterns);
+    }
+
+    // Free pattern filename
+    if (opts->pattern_filename) {
+        free(opts->pattern_filename);
+    }
+
+    // Free paths
+    if (opts->paths) {
+        for (int i = 0; i < opts->path_count; i++) {
+            free(opts->paths[i]);
+        }
+        free(opts->paths);
+    }
+}
