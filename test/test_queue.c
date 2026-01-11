@@ -2,22 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "test_header.h"
 #include "../src/queue.h"
-
-#define RUN_TEST(test_fn)                 \
-    do                                    \
-    {                                     \
-        total_tests++;                    \
-        if (test_fn() != 0) {             \
-            failed_tests++;               \
-            printf("[FAIL] %s\n", #test_fn); \
-        } else {                          \
-            printf("[ OK ] %s\n", #test_fn); \
-        }                                 \
-    } while (0)
-
-static int total_tests = 0;
-static int failed_tests = 0;
 
 
 int test_createQueue()
@@ -146,7 +132,7 @@ int test_tail_null_after_last_dequeue(void)
 
 int main(void)
 {
-    printf("=== Queue Test ===\n\n");
+    printf("\n\n=== queue.c Tests ===\n\n");
 
     RUN_TEST(test_createQueue);
     RUN_TEST(test_isQueueEmpty_on_new_queue);
@@ -160,6 +146,5 @@ int main(void)
     printf("Total tests:   %d\n", total_tests);
     printf("Failed tests:  %d\n", failed_tests);
     printf("Passed tests:  %d\n", total_tests - failed_tests);
-
     return failed_tests == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

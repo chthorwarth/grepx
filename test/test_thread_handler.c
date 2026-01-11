@@ -6,20 +6,8 @@
 #include "../src/queue.h"
 #include "../src/thread_handler.h"
 #include "../src/grep_options.h"
+#include "test_header.h"
 
-#define RUN_TEST(test_fn)                    \
-    do {                                     \
-        total_tests++;                       \
-        if (test_fn() != 0) {                \
-            failed_tests++;                  \
-            printf("[FAIL] %s\n", #test_fn); \
-        } else {                             \
-            printf("[ OK ] %s\n", #test_fn); \
-        }                                    \
-    } while (0)
-
-static int total_tests = 0;
-static int failed_tests = 0;
 
 static pthread_mutex_t count_mutex = PTHREAD_MUTEX_INITIALIZER;
 static int call_count = 0;
@@ -108,6 +96,7 @@ int test_parallelize_multiple_elements(void)
     if (!isQueueEmpty(q))
         return 1;
 
+
     freeQueue(q);
     return 0;
 }
@@ -139,7 +128,7 @@ int test_parallelize_queue_fully_consumed(void)
 
 int main(void)
 {
-    printf("=== Thread Handler Tests ===\n\n");
+    printf("\n\n=== thread_handler.c Tests ===\n\n");
 
     RUN_TEST(test_parallelize_empty_queue);
     RUN_TEST(test_parallelize_single_element);
@@ -150,6 +139,5 @@ int main(void)
     printf("Total tests:   %d\n", total_tests);
     printf("Failed tests:  %d\n", failed_tests);
     printf("Passed tests:  %d\n", total_tests - failed_tests);
-
     return failed_tests == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

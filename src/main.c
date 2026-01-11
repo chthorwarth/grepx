@@ -21,8 +21,10 @@ int main(int argc, char *argv[]) {
     Queue *q = createQueue();
 
     parse(&argc, argv, &opts, context_endptr);
-    if (validate(&opts, context_endptr) == -1)
-        return ERROR;
+    if (validate(&opts, context_endptr) != 0) {
+        freeQueue(q);
+        return EXIT_FAILURE;
+    }
 
     // RECURSIVE
     if (opts.recursive) {
@@ -37,8 +39,10 @@ int main(int argc, char *argv[]) {
     }
 
     // STDIN
-    if (opts.path_count == 0)
+    if (opts.path_count == 0){
+        freeQueue(q);
         return searchStream(stdin, NULL, &opts);
+    }
     freeQueue(q);
     return 0;
 }
