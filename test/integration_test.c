@@ -7,7 +7,7 @@
 #include <limits.h>
 
 /* INCLUDE THE PROVIDED HEADER */
-#include "test_header.h"
+#include "header_test.h"
 
 /* --- HELPER FUNCTIONS --- */
 

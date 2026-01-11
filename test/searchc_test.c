@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 
-#include "test_header.h"
+#include "header_test.h"
 #include "../src/grep_options.h"
 #include "../src/search.h"
 

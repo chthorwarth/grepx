@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "test_header.h"
+#include "header_test.h"
 #include "../src/queue.h"
 
 int exploreDirectories(const char *path, Queue *q);

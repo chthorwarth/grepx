@@ -9,7 +9,7 @@
 #include <stdlib.h>
 
 #include "../src/grep_options.h"
-#include "test_header.h"
+#include "header_test.h"
 
 int test_basic(void)
 {

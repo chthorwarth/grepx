@@ -6,7 +6,7 @@
 #include "../src/queue.h"
 #include "../src/thread_handler.h"
 #include "../src/grep_options.h"
-#include "test_header.h"
+#include "header_test.h"
 
 
 static pthread_mutex_t count_mutex = PTHREAD_MUTEX_INITIALIZER;

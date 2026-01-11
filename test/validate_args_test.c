@@ -6,7 +6,7 @@
 
 #include "../src/grep_options.h"
 #include "../src/validate_args.h"
-#include "test_header.h"
+#include "header_test.h"
 
 /* ---------- TESTS ---------- */
 
