@@ -16,7 +16,7 @@
 
 # Multiple patterns and regex
 ../bin/grepx -e "Data Science2" -e "Cyber Security" ./folder_stage1/datascience.txt
-../bin/grepx "Science[0-9]" ./folder_stage1/*.txt
+../bin/grepx -r "Science[0-9]" ./folder_stage1
 ../bin/grepx "hahaha.*hihihi" ./folder_stage1/datascience.txt
 
 # STDIN
