@@ -52,10 +52,10 @@ $(BUILD_DIR)/src/%.o: $(SRC_DIR)/%.c
 
 tests: directories $(TEST_BIN)
 
-# Special rule: test_thread_handler must exclude search.o to avoid symbol conflicts
+# Special rule: thread_handler_test must exclude search.o to avoid symbol conflicts
 THREAD_TEST_OBJS = $(filter-out $(BUILD_DIR)/src/search.o, $(OBJ_NO_MAIN))
 
-$(BIN_DIR)/test_thread_handler: $(BUILD_DIR)/test/test_thread_handler.o $(THREAD_TEST_OBJS)
+$(BIN_DIR)/thread_handler_test: $(BUILD_DIR)/test/thread_handler_test.o $(THREAD_TEST_OBJS)
 	@echo "Linking Special Test: $@"
 	$(CC) $(CFLAGS) -o $@ $^
 
