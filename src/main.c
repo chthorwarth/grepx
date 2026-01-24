@@ -39,7 +39,10 @@ int main(int argc, char *argv[]) {
         enqueue(q,copy);
     }
     if (queueSize(q) >= 1) {
-        return parallelize(q, &opts);
+        int r = parallelize(q, &opts);
+        freeQueue(q);
+        grep_options_free(&opts);
+        return r;
     }
 
     // STDIN
