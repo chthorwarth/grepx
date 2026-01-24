@@ -45,7 +45,6 @@ static void *worker(void *arg)
         thread_rc = calcReturnCode(thread_rc, r);
         free(path);
     }
-    free(targ);
     return (void*)(long)thread_rc;
 }
 
@@ -60,18 +59,18 @@ int parallelize(Queue *q, grep_options_t *opts)
     if (thread_count <= 0)
         thread_count = 4;
 
-    pthread_t *threads = malloc(sizeof(pthread_t) * thread_count);
+    pthread_t *threads = malloc(sizeof(*threads) * thread_count);
+    thread_arg_t *targs = malloc(sizeof(*targs) * thread_count);
+    if (!threads || !targs) { free(threads); free(targs); return ERROR; }
 
     for (int i = 0; i < thread_count; i++)
     {
-        thread_arg_t *targ = malloc(sizeof(thread_arg_t));
-        targ->queue = q;
-        targ->opts = opts;
+        targs[i].queue = q;
+        targs[i].opts = opts;
 
-        if (pthread_create(&threads[i], NULL, worker, targ) != 0)
+        if (pthread_create(&threads[i], NULL, worker, &targs[i]) != 0)
         {
             perror("pthread_create");
-            free(targ);
             thread_count = i;
             break;
         }
@@ -85,7 +84,7 @@ int parallelize(Queue *q, grep_options_t *opts)
         int rc = (int)(long)retval;
         final_rc = calcReturnCode(final_rc, rc);
     }
-
+    free(targs);
     free(threads);
     return final_rc;
 }

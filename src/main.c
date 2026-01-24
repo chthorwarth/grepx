@@ -33,10 +33,13 @@ int main(int argc, char *argv[]) {
     }
     // MULTIPLE FILES
     for (int i = 0; i < opts.path_count; i++) {
-        enqueue(q,opts.paths[i]);
+        enqueue(q,strdup(opts.paths[i]));
     }
     if (queueSize(q) >= 1) {
-        return parallelize(q, &opts);
+        int r = parallelize(q, &opts);
+        freeQueue(q);
+        grep_options_free(&opts);
+        return r;
     }
 
     // STDIN
