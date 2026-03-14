@@ -27,7 +27,7 @@ We created grepx to explore Unix philosophy in practice: *“Do one thing and do
 ## Presentation
 
 The project presentation slides are available here:  
-- [grepx Presentation Slides](presentation/grepxPräsentation.pdf)
+- [grepx Presentation Slides](presentation/grepxPresentation.pdf)
 
 ## How to start
 
