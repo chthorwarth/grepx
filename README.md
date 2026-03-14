@@ -2,7 +2,7 @@
 
 ## About the Project
 
-This project was developed as part of the System-Level Programming module at the Technical University of Applied Sciences Würzburg-Schweinfurt (THWS). It’s a **Unix command-line tool** inspired by `grep`, designed to filter text streams and files line-by-line.
+This project was developed as a team effort during the System-Level Programming module at the Technical University of Applied Sciences Würzburg-Schweinfurt (THWS). It’s a **Unix command-line tool** inspired by `grep`, designed to filter text streams and files line-by-line.
 
 ### Motivation
 
