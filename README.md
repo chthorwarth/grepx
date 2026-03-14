@@ -1,15 +1,33 @@
-## Coding Assistant Usage
+# grepx – Unix Command-Line Text Filter
 
-We used the following coding assistants during development: **ChatGPT** and **Google Gemini**.
+## About the Project
 
-We did **not** use full autonomous coding tools such as *Claude Code* or *Codex*. The overall **software architecture, design decisions, and implementation strategy were created entirely by us**.
+This project was developed as part of the System-Level Programming module at the Technical University of Applied Sciences Würzburg-Schweinfurt (THWS). It’s a **Unix command-line tool** inspired by `grep`, designed to filter text streams and files line-by-line in a pipeline-compatible, modular way.
 
-The coding assistants were used only in a **supporting role**, mainly for:
-- **Generating small, isolated code snippets** within a clearly defined context
-- **Producing unit and integration tests** that were written **independently of our implementation** to help detect bugs and verify correctness
-- **Assisting with refactoring, documentation, explanations, and general knowledge or idea exploration**
+### Motivation
 
-All generated code was reviewed, adapted, and integrated manually.
+We created grepx to explore **Unix philosophy in practice**: *“Do one thing and do it right”*. During development, we learned to identify the **core functionality of grep** (line-based text filtering) and clearly separate it from auxiliary tasks (such as reading files, which can be handled by tools like `find`). We implemented **order-independent option parsing** for maximum flexibility and gained insight into the internal workings and design concepts of Unix command-line tools. Implementing a simplified grep allowed us to understand **pipeline integration, exit code conventions, and core Linux command-line design**.
+
+## Key Features
+
+* **grep-inspired filtering:** Line-by-line text matching using POSIX regular expressions.  
+* **Pipeline-compatible:** Seamlessly works with other Unix tools like `cat` or `find`.  
+* **Order-independent option parsing:** Options can be specified in any order, following Unix conventions.  
+* **Multithreaded file processing:** Parallelizes file handling for improved performance.  
+* **Unix exit codes:** Returns standard codes for match, no match, and errors.  
+* **Modular architecture:** Clear separation of parsing, validation, and search logic for easy testing and extensibility.
+
+## Tech Stack
+
+* **Language:** C  
+* **Build system:** Make  
+* **Multithreading:** pthreads  
+* **Testing:** Unit and integration tests with I/O redirection  
+
+## Presentation
+
+The project presentation slides are available here:  
+- [grepx Presentation Slides](doc/grepxPresentation.pdf)
 
 ## How to start
 
@@ -24,7 +42,7 @@ All generated code was reviewed, adapted, and integrated manually.
    make all
 4. Run the grepx binary, for example
    ```bash
-   ./bin/grepx "Coding Assistant" README.md
+   ./bin/grepx "Tech Stack" README.md
 5. General usage follows the standard Linux grep syntax:
    ```bash
    grepx [OPTIONS] PATTERN [FILE...]
@@ -36,3 +54,17 @@ All generated code was reviewed, adapted, and integrated manually.
    ```bash
    make test
 3. The test suite will execute unit and integration tests
+
+## Coding Assistant Usage
+
+We used the following coding assistants during development: **ChatGPT** and **Google Gemini**.
+
+We did **not** use full autonomous coding tools such as *Claude Code* or *Codex*. The overall **software architecture, design decisions, and implementation strategy were created entirely by us**.
+
+The coding assistants were used only in a **supporting role**, mainly for:
+- **Generating small, isolated code snippets** within a clearly defined context
+- **Producing unit and integration tests** that were written **independently of our implementation** to help detect bugs and verify correctness
+- **Assisting with refactoring, documentation, explanations, and general knowledge or idea exploration**
+
+All generated code was reviewed, adapted, and integrated manually.
+
