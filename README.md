@@ -2,11 +2,11 @@
 
 ## About the Project
 
-This project was developed as part of the System-Level Programming module at the Technical University of Applied Sciences Würzburg-Schweinfurt (THWS). It’s a **Unix command-line tool** inspired by `grep`, designed to filter text streams and files line-by-line in a pipeline-compatible, modular way.
+This project was developed as part of the System-Level Programming module at the Technical University of Applied Sciences Würzburg-Schweinfurt (THWS). It’s a **Unix command-line tool** inspired by `grep`, designed to filter text streams and files line-by-line.
 
 ### Motivation
 
-We created grepx to explore **Unix philosophy in practice**: *“Do one thing and do it right”*. During development, we learned to identify the **core functionality of grep** (line-based text filtering) and clearly separate it from auxiliary tasks (such as reading files, which can be handled by tools like `find`). We implemented **order-independent option parsing** for maximum flexibility and gained insight into the internal workings and design concepts of Unix command-line tools. Implementing a simplified grep allowed us to understand **pipeline integration, exit code conventions, and core Linux command-line design**.
+We created grepx to explore Unix philosophy in practice: *“Do one thing and do it right”*. During development, we learned to identify the core functionality of grep (line-based text filtering) and clearly separate it from auxiliary tasks. We gained insight into the internal workings and design concepts of Unix command-line tools, such as order-independent option parsing, pipeline integration, and standard Unix exit code conventions.
 
 ## Key Features
 
